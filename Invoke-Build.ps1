@@ -6,7 +6,7 @@ function Invoke-Build {
         $ModuleName,
 
         [string]
-        $ModuleVersion = "0.1.10",
+        $ModuleVersion = "0.1.11",
 
         [switch]
         $UpdateManifest,
@@ -56,7 +56,7 @@ function Invoke-Build {
                 Author = "Harish Karthic"
                 RootModule = "$ModuleName.psm1"
                 ModuleVersion = $ModuleVersion
-                Description = "Module to automate Export and Import of TSQL database."
+                Description = "**PSDB** is a PowerShell module which wrapps the operation of Azure Sql import and export and provides additional functionality to drive the import and export operation as you do in Azure portal."
                 FunctionsToExport = @($functions)
             }
 

@@ -1,13 +1,15 @@
 # PSDB
 
-**PSDB** is a PowerShell module which wrapps the operation of Azure Sql import and export and provides additional functionality to drive the import and export operation as you do in Azure.
+**PSDB** is a PowerShell module which wrapps the operation of Azure Sql import and export and provides additional functionality to drive the import and export operation as you do in Azure portal.
 
 It comes with tab completion of resource groups, sql servers, storage accounts and key vaults to select the resources easily. Also there are two helper functions `Get-PSDBDatabaseData` and `Invoke-PSDBDatabaseQuery` which allows you to open database connection and perfom database operations. This module is created to automate end to end sql import, export and database operations.
 
 ## Getting Started
 
+You can directly install the module from PowerShell gallery if you are using PowerShell v5 and above or clone the repo.
+
 ```powershell
-PS C:\> Install-Module PSDB
+PS C:\> Install-Module -Name PSDB -Scope CurrentUser
 ```
 
 ## EXAMPLES
