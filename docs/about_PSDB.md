@@ -49,10 +49,10 @@ Make sure to set the correct subscription in current context before calling any 
 
 # SEE ALSO
 
-Set-PSDBDefaults
-Get-PSDBDatabaseData
-Invoke-PSDBDatabaseQuery
+[Set-PSDBDefaults](https://github.com/hkarthik7/PSDB/blob/master/docs/Set-PSDBDefaults.md)
+[Get-PSDBDatabaseData](https://github.com/hkarthik7/PSDB/blob/master/docs/Get-PSDBDatabaseData.md)
+[Invoke-PSDBDatabaseQuery](https://github.com/hkarthik7/PSDB/blob/master/docs/Invoke-PSDBDatabaseQuery.md)
 
 # KEYWORDS
 
-- Set-PSDBDefaults
+- [Set-PSDBDefaults](https://github.com/hkarthik7/PSDB/blob/master/docs/Set-PSDBDefaults.md)
