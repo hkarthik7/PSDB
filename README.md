@@ -16,7 +16,7 @@ PS C:\> Install-Module PSDB
 PS C:\> Set-PSDBDefaults -Subscription "mySubscription" -ResourceGroupName "RSG" -ServerName "SqlServer01" -DatabaseName "Database01"
 ```
 
-Calling Set-PSDBDefaults function with above mentioned parameters allows you to set the passed parameters in the current context. This way you don't have to specify ResourceGroupname, ServerName and DatabaseName in Export, Import and other functions that require these parameters. You can simply call the function with other mandatory parameters and execute.
+Calling `Set-PSDBDefaults` function with above mentioned parameters allows you to set the passed parameters in the current context. This way you don't have to specify ResourceGroupname, ServerName and DatabaseName in Export, Import and other functions that require these parameters. You can simply call the function with other mandatory parameters and execute.
 
 - Perform export operation. Let's take an example that you want to export database from development subscription and place the exported .bacpac file in test subscription's sstorage account you can do the following. If you are exporting and saving the bacpac in same subscription then it is not mandatory to pass value to -Subscription parameter.
 
