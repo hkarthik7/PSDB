@@ -53,12 +53,16 @@ function Invoke-Build {
             $manifest = @{
                 Path = "$root\$ModuleName\$ModuleName.psd1"
                 Guid = (New-Guid)
-                CompanyName = ""
+                CompanyName = "''"
                 Author = "Harish Karthic"
                 RootModule = "$ModuleName.psm1"
                 ModuleVersion = $ModuleVersion
                 Description = "**PSDB** is a PowerShell module which wrapps the operation of Azure Sql import and export and provides additional functionality to drive the import and export operation as you do in Azure portal."
                 FunctionsToExport = @($functions)
+                LicenseUri = 'https://github.com/hkarthik7/PSDB/blob/master/LICENSE'
+                ProjectUri = 'https://github.com/hkarthik7/PSDB'
+                ReleaseNotes = 'https://github.com/hkarthik7/PSDB/blob/master/CHANGELOG.md'
+                Tags = @("PSDB", "AzureSqlImport", "AzureSqlExport", "PowerShellAzureSql", "SqlExport", "SqlAutomation", "DatabaseAutomation")
             }
 
             New-ModuleManifest @manifest
