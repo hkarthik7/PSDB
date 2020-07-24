@@ -37,8 +37,9 @@ function Invoke-Build {
             if ($folder -eq "Classes") {
                 $class = Get-Content (Get-ChildItem -Path "$root\$folder" -Filter "*.ps1").FullName
                 $class | Set-Content "$root\$ModuleName\$ModuleName.classes.ps1"
+            } else {
+                $contents += Get-Content (Get-ChildItem -Path "$root\$folder" -Filter "*.ps1").FullName
             }
-            $contents += Get-Content (Get-ChildItem -Path "$root\$folder" -Filter "*.ps1").FullName
         }
 
         $contents | Set-Content "$root\$ModuleName\$ModuleName.functions.ps1"
