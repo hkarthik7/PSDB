@@ -89,6 +89,8 @@ function Export-PSDBSqlDatabase {
 
             Write-Output "Sql Export is : $($sqlExport.Status)"
 
+            return $sqlExport.OperationStatusLink
+
             #end region start DB export
         }
         catch {
