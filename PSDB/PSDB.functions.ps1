@@ -240,6 +240,8 @@ function Export-PSDBSqlDatabase {
 
             Write-Output "Sql Export is : $($sqlExport.Status)"
 
+            return $sqlExport.OperationStatusLink
+
             #end region start DB export
         }
         catch {
@@ -488,6 +490,8 @@ function Import-PSDBSqlDatabase {
             $sqlImport = New-AzSqlDatabaseImport @splat
             
             Write-Output "Sql Import is : $($sqlImport.Status)"
+
+            return $sqlImport.OperationStatusLink
         }
         catch {
             throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
