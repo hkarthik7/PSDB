@@ -6,7 +6,7 @@ function Invoke-Build {
         $ModuleName,
 
         [string]
-        $ModuleVersion = "0.1.11",
+        $ModuleVersion = "0.1.12",
 
         [switch]
         $UpdateManifest,
@@ -87,4 +87,4 @@ function Invoke-Build {
     }
 }
 
-Invoke-Build -ModuleName "PSDB"
+Invoke-Build -ModuleName "PSDB" -UpdateManifest
