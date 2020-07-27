@@ -1,3 +1,7 @@
+# 0.1.13
+
+Added new function `Get-PSDBImportExportStatus` to check the status of import or export operation.
+
 # 0.1.12
 
 Now Export and Import functions return the operational status link which helps to monitor the status continuously.

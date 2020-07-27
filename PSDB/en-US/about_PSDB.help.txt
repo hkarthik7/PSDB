@@ -58,8 +58,11 @@ TROUBLESHOOTING NOTE
     any function.
 
 SEE ALSO
-    Set-PSDBDefaults Get-PSDBDatabaseData Invoke-PSDBDatabaseQuery
+    Set-PSDBDefaults
+    Get-PSDBDatabaseData
+    Invoke-PSDBDatabaseQuery
 
 KEYWORDS
-    - Set-PSDBDefaults
+    -
+    Set-PSDBDefaults
 

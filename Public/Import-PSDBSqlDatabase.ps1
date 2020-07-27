@@ -122,8 +122,6 @@ function Import-PSDBSqlDatabase {
             }
 
             $sqlImport = New-AzSqlDatabaseImport @splat
-            
-            Write-Output "Sql Import is : $($sqlImport.Status)"
 
             return $sqlImport.OperationStatusLink
         }

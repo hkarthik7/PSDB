@@ -87,8 +87,6 @@ function Export-PSDBSqlDatabase {
 
             $sqlExport = New-AzSqlDatabaseExport @splat
 
-            Write-Output "Sql Export is : $($sqlExport.Status)"
-
             return $sqlExport.OperationStatusLink
 
             #end region start DB export
