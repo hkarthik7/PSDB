@@ -104,7 +104,7 @@ function Import-PSDBSqlDatabase {
             }
 
             if (-not $ImportDatabaseAs) {
-                $ImportDatabaseAs = $BacpacName
+                $ImportDatabaseAs = $BacpacName.Replace(".bacpac", "")
             }
 
             $splat = @{

@@ -1,3 +1,7 @@
+# 0.1.14
+
+Bug fix for `Import-PSDBSqlDatabase`. Database name is being imported with .bacpac extension, this bug is removed in this version.
+
 # 0.1.13
 
 Added new function `Get-PSDBImportExportStatus` to check the status of import or export operation.
