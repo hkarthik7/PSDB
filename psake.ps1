@@ -1,0 +1,1 @@
+Invoke-psake .\build.ps1
