@@ -21,7 +21,7 @@ Task init {
     }
 }
 
-Task build -depends init {  
+Task build {  
 
     # move all the functions to module file and export only public functions.
     foreach ($folder in $folders) {
