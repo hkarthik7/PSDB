@@ -4,11 +4,11 @@
 
 # SHORT DESCRIPTION
 
-**PSDB** is a PowerShell module which wrapps the operation of Azure Sql import and export and provides additional functionality to drive the import and export operation as you do in Azure.
+PSDB is a PowerShell module which wrapps the operation of Azure Sql import and export and provides additional functionality to drive the import and export operation as you do in Azure.
 
 # LONG DESCRIPTION
 
-**PSDB** is a PowerShell module which wrapps the operation of Azure Sql import and export and provides additional functionality to drive the import and export operation as you do in Azure.
+PSDB is a PowerShell module which wrapps the operation of Azure Sql import and export and provides additional functionality to drive the import and export operation as you do in Azure.
 
 It comes with tab completion of resource groups, sql servers, storage accounts and key vaults to select the resources easily. Also there are two helper functions `Get-PSDBDatabaseData` and `Invoke-PSDBDatabaseQuery` which allows you to open database connection and perfom database operations. This module is created to automate end to end sql import, export and database operations.
 
@@ -55,4 +55,4 @@ Make sure to set the correct subscription in current context before calling any 
 
 # KEYWORDS
 
-- [Set-PSDBDefaults](https://github.com/hkarthik7/PSDB/blob/master/docs/Set-PSDBDefaults.md)
+[Set-PSDBDefaults](https://github.com/hkarthik7/PSDB/blob/master/docs/Set-PSDBDefaults.md)

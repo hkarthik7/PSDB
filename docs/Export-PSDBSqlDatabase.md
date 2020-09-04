@@ -218,3 +218,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Export-PSDBSqlDatabase](https://github.com/hkarthik7/PSDB/blob/master/docs/Export-PSDBSqlDatabase.md)

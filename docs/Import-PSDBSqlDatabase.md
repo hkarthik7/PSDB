@@ -271,3 +271,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Import-PSDBSqlDatabase](https://github.com/hkarthik7/PSDB/blob/master/docs/Import-PSDBSqlDatabase.md)

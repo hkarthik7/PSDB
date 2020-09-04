@@ -115,3 +115,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Get-PSDBImportExportStatus](https://github.com/hkarthik7/PSDB/blob/master/docs/Get-PSDBImportExportStatus.md)

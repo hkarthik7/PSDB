@@ -21,6 +21,8 @@ This function helps to identify the right connection string for Azure Sql databa
 `New-PSDBConnectionString` function to form the connection string. Then it can be passed to helper functions `Get-PSDBDatabaseData` and `Invoke-PSDBDatabaseQuery`
 to connect and work with Sql database.
 
+These connection strings are available in [Connection Strings Website](https://www.connectionstrings.com/sql-server/).
+
 ## EXAMPLES
 
 ### Example 1
@@ -53,3 +55,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Get-PSDBConnectionString](https://github.com/hkarthik7/PSDB/blob/master/docs/Get-PSDBConnectionString.md)

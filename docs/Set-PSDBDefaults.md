@@ -139,3 +139,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Set-PSDBDefaults](https://github.com/hkarthik7/PSDB/blob/master/docs/Set-PSDBDefaults.md)

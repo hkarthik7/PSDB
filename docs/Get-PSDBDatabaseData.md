@@ -82,4 +82,4 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[Connection Strings](https://www.connectionstrings.com/sql-server/)
+[Get-PSDBDatabaseData](https://github.com/hkarthik7/PSDB/blob/master/docs/Get-PSDBDatabaseData.md)
