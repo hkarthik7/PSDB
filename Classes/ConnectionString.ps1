@@ -1,6 +1,6 @@
 using namespace System.Text;
 
-class ConnectionString 
+class PSDBConnectionString 
 {
     static [int] $PortNumber = 1433
     static [bool] $TrustedConnection = $false
@@ -14,12 +14,12 @@ class ConnectionString
     [string] BuildConnectionString ([string] $Server, [string] $Database, [string] $UserID, [string] $Pswd)
     {
         [StringBuilder] $StringBuilder = [StringBuilder]::new()
-        $StringBuilder.Append("Server=tcp:$($Server),$([ConnectionString]::PortNumber);") > $null
+        $StringBuilder.Append("Server=tcp:$($Server),$([PSDBConnectionString]::PortNumber);") > $null
         $StringBuilder.Append("Database=$($Database);") > $null
         $StringBuilder.Append("User ID=$($UserID)@$($Server);") > $null
         $StringBuilder.Append("Password=$($Pswd);") > $null
-        $StringBuilder.Append("Trusted_Connection=$([ConnectionString]::TrustedConnection);") > $null
-        $StringBuilder.Append("Encrypt=$([ConnectionString]::Encrypt);") > $null
+        $StringBuilder.Append("Trusted_Connection=$([PSDBConnectionString]::TrustedConnection);") > $null
+        $StringBuilder.Append("Encrypt=$([PSDBConnectionString]::Encrypt);") > $null
 
         return $StringBuilder.ToString()
     }
@@ -28,12 +28,12 @@ class ConnectionString
     [string] BuildConnectionString ([string] $Server, [string] $Database, [string] $UserID, [string] $Pswd, [bool] $MultipleActiveResultSets = $true)
     {
         [StringBuilder] $StringBuilder = [StringBuilder]::new()
-        $StringBuilder.Append("Server=tcp:$($Server),$([ConnectionString]::PortNumber);") > $null
+        $StringBuilder.Append("Server=tcp:$($Server),$([PSDBConnectionString]::PortNumber);") > $null
         $StringBuilder.Append("Database=$($Database);") > $null
         $StringBuilder.Append("User ID=$($UserID)@$($Server);") > $null
         $StringBuilder.Append("Password=$($Pswd);") > $null
-        $StringBuilder.Append("Trusted_Connection=$([ConnectionString]::TrustedConnection);") > $null
-        $StringBuilder.Append("Encrypt=$([ConnectionString]::Encrypt);") > $null
+        $StringBuilder.Append("Trusted_Connection=$([PSDBConnectionString]::TrustedConnection);") > $null
+        $StringBuilder.Append("Encrypt=$([PSDBConnectionString]::Encrypt);") > $null
         $StringBuilder.Append("MultipleActiveResultSets=$($MultipleActiveResultSets);") > $null
 
         return $StringBuilder.ToString()
@@ -43,7 +43,7 @@ class ConnectionString
     [string] BuildConnectionString ([string] $Server, [string] $Database, [string] $Authentication)
     {
         [StringBuilder] $StringBuilder = [StringBuilder]::new()
-        $StringBuilder.Append("Server=tcp:$($Server),$([ConnectionString]::PortNumber);") > $null
+        $StringBuilder.Append("Server=tcp:$($Server),$([PSDBConnectionString]::PortNumber);") > $null
         $StringBuilder.Append("Authentication=$($Authentication);") > $null
         $StringBuilder.Append("Database=$($Database);") > $null
 
@@ -54,7 +54,7 @@ class ConnectionString
     [string] BuildConnectionString ([string] $Server, [string] $Database, [string] $Authentication, [string] $UserID, [string] $Pswd, [string] $Domain)
     {
         [StringBuilder] $StringBuilder = [StringBuilder]::new()
-        $StringBuilder.Append("Server=tcp:$($Server),$([ConnectionString]::PortNumber);") > $null
+        $StringBuilder.Append("Server=tcp:$($Server),$([PSDBConnectionString]::PortNumber);") > $null
         $StringBuilder.Append("Authentication=$($Authentication);") > $null
         $StringBuilder.Append("Database=$($Database);") > $null
         $StringBuilder.Append("UID=$($UserID)@$($Domain);") > $null
