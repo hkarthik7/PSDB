@@ -54,12 +54,12 @@ function Export-PSDBSqlDatabase {
 
                 if ($context -ne $Subscription) {
                     
-                    Set-PSDBDefaults -Subscription $Subscription
+                    Set-PSDBDefault -Subscription $Subscription
 
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
 
-                    Set-PSDBDefaults -Subscription $context
+                    Set-PSDBDefault -Subscription $context
                 } else {
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
