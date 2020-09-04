@@ -205,12 +205,12 @@ function Export-PSDBSqlDatabase {
 
                 if ($context -ne $Subscription) {
                     
-                    Set-PSDBDefaults -Subscription $Subscription
+                    Set-PSDBDefault -Subscription $Subscription
 
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
 
-                    Set-PSDBDefaults -Subscription $context
+                    Set-PSDBDefault -Subscription $context
                 } else {
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
@@ -489,7 +489,7 @@ function Import-PSDBSqlDatabase {
 
                 if ($context -ne $Subscription) {
                     
-                    Set-PSDBDefaults -Subscription $Subscription
+                    Set-PSDBDefault -Subscription $Subscription
 
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
@@ -501,7 +501,7 @@ function Import-PSDBSqlDatabase {
                         $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
                     }
 
-                    Set-PSDBDefaults -Subscription $context
+                    Set-PSDBDefault -Subscription $context
 
                 } else {
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
@@ -702,10 +702,10 @@ function New-PSDBConnectionString {
         }        
     }
 }
-function Set-PSDBDefaults {
-    [CmdletBinding()]
+function Set-PSDBDefault {
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "Low")]
     param (
-        [Parameter(Position = 0, ValueFromPipeline = $true)]
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
         [ArgumentCompleter([SubscriptionCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $Subscription,
@@ -764,7 +764,7 @@ function Set-PSDBDefaults {
             $Level = "Process"
         }
 
-        if ($Subscription) {
+        if ($PSCmdlet.ShouldProcess($Subscription, "Set-PSDBDefault")) {
 
             # clearing the defaults. It returns old values if session is not restarted.
             _clearDefaults
