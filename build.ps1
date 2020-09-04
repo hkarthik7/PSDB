@@ -21,7 +21,7 @@ Task init {
     }
 }
 
-Task build {  
+Task build -depends init {  
 
     # move all the functions to module file and export only public functions.
     foreach ($folder in $folders) {
@@ -40,14 +40,11 @@ Task updateManifest {
     # import and copy only public functions to manifest file.
     Import-Module "$root\$ModuleName\$ModuleName.psm1" -Force
 
-    # $functions = Get-ModuleFunction
+    $functions = (Get-Command -Module $ModuleName).Name | Where-Object {$_ -like "*-*"}
 
     Step-ModuleVersion -Path (Get-PSModuleManifest) -By $Version
-}
 
-Task import {
-    # forcing the import of final module
-    Import-Module "$root\$ModuleName" -Force
+    Set-ModuleFunction -Name (Get-PSModuleManifest) -FunctionsToExport $functions
 }
 
 Task createMarkdownHelp {
@@ -64,4 +61,4 @@ Task createExternalHelp {
     New-ExternalHelp -Path "$root\docs" -OutputPath "$root\$ModuleName\en-US" -Force
 }
 
-Task default -depends init,build,import
+Task default -depends init,build
