@@ -69,7 +69,7 @@ Description = 'PSDB is a PowerShell module which wrapps the operation of Azure S
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('Export-PSDBSqlDatabase','Get-PSDBConnectionString','Get-PSDBDatabaseData','Get-PSDBImportExportStatus','Get-PSDBKVSecret','Import-PSDBSqlDatabase','Invoke-PSDBDatabaseQuery','Set-PSDBDefaults')
+FunctionsToExport = @('Export-PSDBSqlDatabase','Get-PSDBConnectionString','Get-PSDBDatabaseData','Get-PSDBImportExportStatus','Get-PSDBKVSecret','Import-PSDBSqlDatabase','Invoke-PSDBDatabaseQuery','New-PSDBConnectionString','Set-PSDBDefaults')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'
