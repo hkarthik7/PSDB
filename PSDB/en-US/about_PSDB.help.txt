@@ -25,7 +25,6 @@ EXAMPLES
     to specify ResourceGroupname, ServerName and DatabaseName in Export, Import
     and other functions that require these parameters. You can simply call the
     function with other mandatory parameters and execute.
-    
     - Perform export operation. Let's take an example that you want to export
     database from development subscription and place the exported .bacpac file
     in test subscription's sstorage account you can do the following. If you are
@@ -63,6 +62,5 @@ SEE ALSO
     Invoke-PSDBDatabaseQuery
 
 KEYWORDS
-    -
-    Set-PSDBDefaults
+    - Set-PSDBDefaults
 
