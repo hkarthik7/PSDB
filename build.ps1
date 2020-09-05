@@ -10,8 +10,7 @@ param (
 
 # declaring constants
 $root = Split-Path $PSCommandPath
-$contents = @()
-$folders = @("Classes", "Private", "Public")
+. .\Merge-Files.ps1
 
 
 Task init {
@@ -23,27 +22,18 @@ Task init {
 
 Task build {  
 
-    # move all the functions to module file and export only public functions.
-    foreach ($folder in $folders) {
-        if ($folder -eq "Classes") {
-            $class = Get-Content (Get-ChildItem -Path "$root\$folder" -Filter "*.ps1").FullName
-            $class | Set-Content "$root\$ModuleName\$ModuleName.classes.ps1"
-        } else {
-            $contents += Get-Content (Get-ChildItem -Path "$root\$folder" -Filter "*.ps1").FullName
-        }
-    }
-
-    $contents | Set-Content "$root\$ModuleName\$ModuleName.functions.ps1"
+    # move all the functions to module file.
+    Merge-Files -InputDirectory .\Classes -OutputDirectory .\PSDB\PSDB.classes.ps1 -Classes -Verbose
+    Merge-Files -InputDirectory .\Private\, .\Public\ -OutputDirectory .\PSDB\PSDB.functions.ps1 -Functions -Verbose
 }
 
 Task updateManifest {
     # import and copy only public functions to manifest file.
     Import-Module "$root\$ModuleName\$ModuleName.psm1" -Force
-
     $functions = (Get-Command -Module $ModuleName).Name | Where-Object {$_ -like "*-*"}
 
+    # Bump the version of the module
     Step-ModuleVersion -Path (Get-PSModuleManifest) -By $Version
-
     Set-ModuleFunction -Name (Get-PSModuleManifest) -FunctionsToExport $functions
 }
 
