@@ -1,6 +1,9 @@
 using namespace System.Text;
 
-class PSDBConnectionString 
+# This class attribute helps to create connection string for connection Azure Sql database.
+# More information on how to form or create a connection string can be found at
+# https://www.connectionstrings.com/
+class PSDBConnectionString
 {
     static [int] $PortNumber = 1433
     static [bool] $TrustedConnection = $false
