@@ -13,6 +13,7 @@ class PSDBConnectionString
     static [bool] $MultipleActiveResultSets = $true
     static [bool] $IntegratedSecurity = $true
     static [string] $ColumnEncryptionSetting = "enabled"
+    PSDBConnectionString() {}
     # constructs the standard connection string for Azure Sql
     [string] BuildConnectionString ([string] $Server, [string] $Database, [string] $UserID, [string] $Pswd)
     {
