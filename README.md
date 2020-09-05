@@ -15,16 +15,16 @@ PS C:\> Install-Module -Name PSDB -Scope CurrentUser
 ## EXAMPLES
 
 ```powershell
-PS C:\> Set-PSDBDefaults -Subscription "mySubscription" -ResourceGroupName "RSG" -ServerName "SqlServer01" -DatabaseName "Database01"
+PS C:\> Set-PSDBDefault -Subscription "mySubscription" -ResourceGroupName "RSG" -ServerName "SqlServer01" -DatabaseName "Database01"
 ```
 
-Calling `Set-PSDBDefaults` function with above mentioned parameters allows you to set the passed parameters in the current context. This way you don't have to specify ResourceGroupname, ServerName and DatabaseName in Export, Import and other functions that require these parameters. You can simply call the function with other mandatory parameters and execute.
+Calling `Set-PSDBDefault` function with above mentioned parameters allows you to set the passed parameters in the current context. This way you don't have to specify ResourceGroupname, ServerName and DatabaseName in Export, Import and other functions that require these parameters. You can simply call the function with other mandatory parameters and execute.
 
 - Perform export operation. Let's take an example that you want to export database from development subscription and place the exported .bacpac file in test subscription's sstorage account you can do the following. If you are exporting and saving the bacpac in same subscription then it is not mandatory to pass value to -Subscription parameter.
 
 ```powershell
 # Set the default values. Since you have to export the database from development lets set the context as development.
-PS C:\> Set-PSDBDefaults -Subscription "development" -ResourceGroupName "RSG" -ServerName "SqlServer01" -DatabaseName "Database01"
+PS C:\> Set-PSDBDefault -Subscription "development" -ResourceGroupName "RSG" -ServerName "SqlServer01" -DatabaseName "Database01"
 
 # Now that context is set; retrieve username and password for database from keyvault. You can also pass the username and password as is, refer cmdlet releated help by running help Export-PSDBSqlDatabase -Full to know more.
 PS C:\> $userName = Get-PSDBKVSecret -VaultName "myKeyVault" -SecretName "SQLUSERNAME" -AsPlainText
