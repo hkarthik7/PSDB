@@ -1,5 +1,7 @@
 function New-PSDBConnectionString {
-    [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', Justification = "Ths functions creates a connection
+    string and doesn't perform any state changing action.")]
+    [CmdletBinding(DefaultParameterSetName = "AAD")]
     param (
         [Parameter(Mandatory = $true, ParameterSetName = "Standard")]
         [Parameter(Mandatory = $true, ParameterSetName = "MARSEnabled")]
@@ -81,10 +83,11 @@ function New-PSDBConnectionString {
                     Write-Error -Exception ArgumentException -Message $Message -Category NotSpecified -ErrorId $ErrorId
 
                 } else {
-                    $UserId = $Credential.UserName
+                    $UserId = $Credential.GetNetworkCredential().UserName
+                    $Domain = $Credential.GetNetworkCredential().Domain
                     $Password = $Credential.GetNetworkCredential().Password
 
-                    $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $Authentication, $UserId, $Password)
+                    $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $Authentication, $UserId, $Password, $Domain)
                 }
             }
 
