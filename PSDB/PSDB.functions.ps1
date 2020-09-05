@@ -478,9 +478,8 @@ function Invoke-PSDBDatabaseQuery {
     }
 }
 function New-PSDBConnectionString {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', Justification = "Ths functions creates a connection
-    string and doesn't perform any state changing action.")]
-    [CmdletBinding(DefaultParameterSetName = "AAD")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
+    [CmdletBinding(DefaultParameterSetName = "AADIntegrated")]
     param (
         [Parameter(Mandatory = $true, ParameterSetName = "Standard")]
         [Parameter(Mandatory = $true, ParameterSetName = "MARSEnabled")]
