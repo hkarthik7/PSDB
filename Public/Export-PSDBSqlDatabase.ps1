@@ -3,15 +3,19 @@ function Export-PSDBSqlDatabase {
     [Alias("Export")]
     Param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [ResourceGroupValidateAttribute()]
         [ArgumentCompleter([ResourceGroupCompleter])]
         [ValidateNotNullOrEmpty()]
         [string]$ResourceGroupName,
 
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
+        [SqlDatabaseValidateAttribute()]
+        [ArgumentCompleter([DatabaseCompleter])]
         [ValidateNotNullOrEmpty()]
         [string]$DatabaseName,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [SqlServerValidateAttribute()]
         [ArgumentCompleter([SqlServerCompleter])]
         [ValidateNotNullOrEmpty()]
         [string]$ServerName,
@@ -28,6 +32,7 @@ function Export-PSDBSqlDatabase {
         [string]$StorageContainerName,
 
         [Parameter(HelpMessage = "Provide the name of blob that you want to save as.")]
+        [ValidateNotNullOrEmpty()]
         [string] $BlobName,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
@@ -39,7 +44,9 @@ function Export-PSDBSqlDatabase {
         [securestring] $AdministratorLoginPassword,
 
         [Parameter(Mandatory = $false, HelpMessage = "Provide the subscription name if exported .bacpac file have to be saved in different subscription.")]
+        [SubscriptionValidateAttribute()]
         [ArgumentCompleter([SubscriptionCompleter])]
+        [ValidateNotNullOrEmpty()]
         [string] $Subscription
     )
 

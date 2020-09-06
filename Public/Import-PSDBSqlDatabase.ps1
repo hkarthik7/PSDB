@@ -12,6 +12,7 @@ function Import-PSDBSqlDatabase {
         [string] $ImportDatabaseAs,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [SqlServerValidateAttribute()]
         [ArgumentCompleter([SqlServerCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $ServerName,
@@ -34,6 +35,7 @@ function Import-PSDBSqlDatabase {
         [string] $StorageContainerName,
 
         [Parameter(HelpMessage = "Provide the name of .bacpac file. If not provided it tries to retrieve latest '.bacpac' file from provided container.")]
+        [ValidateNotNullOrEmpty()]
         [string] $BacpacName,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
@@ -45,7 +47,9 @@ function Import-PSDBSqlDatabase {
         [securestring] $AdministratorLoginPassword,
 
         [Parameter(Mandatory = $false, HelpMessage = "Provide the subscription name to import .bacpac file from.")]
+        [SubscriptionValidateAttribute()]
         [ArgumentCompleter([SubscriptionCompleter])]
+        [ValidateNotNullOrEmpty()]
         [string] $Subscription
     )
     

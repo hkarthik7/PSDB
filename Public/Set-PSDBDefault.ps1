@@ -2,6 +2,7 @@ function Set-PSDBDefault {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "Low")]
     param (
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
+        [SubscriptionValidateAttribute()]
         [ArgumentCompleter([SubscriptionCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $Subscription,
@@ -11,6 +12,7 @@ function Set-PSDBDefault {
         [ValidateNotNullOrEmpty()]
         [string] $ResourceGroupName,
 
+        [SqlServerValidateAttribute()]
         [ArgumentCompleter([SqlServerCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $ServerName,

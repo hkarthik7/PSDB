@@ -3,6 +3,7 @@ function Get-PSDBImportExportStatus {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [string] $StatusLink,
 
         [int] $Interval = 5,

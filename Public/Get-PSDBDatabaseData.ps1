@@ -8,9 +8,11 @@ function Get-PSDBDatabaseData {
             ValueFromPipeline = $true, 
             ValueFromPipelineByPropertyName = $true,
             HelpMessage = "Provide the database connection string.")]
+        [ValidateNotNullOrEmpty()]        
         [string] $ConnectionString,
 
         [Parameter(Mandatory = $true, Position = 1, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [string] $Query
     )
     

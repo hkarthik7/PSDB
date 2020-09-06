@@ -14,6 +14,7 @@ function New-PSDBConnectionString {
         [Parameter(Mandatory = $true, ParameterSetName = "MARSEnabled")]
         [Parameter(Mandatory = $true, ParameterSetName = "AADIntegrated")]
         [Parameter(Mandatory = $true, ParameterSetName = "AAD")]
+        [ArgumentCompleter([DatabaseCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $DatabaseName,
 
