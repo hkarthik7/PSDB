@@ -54,7 +54,7 @@ Description = 'PSDB is a PowerShell module which wrapps the operation of Azure S
 RequiredModules = @('Az.Accounts', 'Az.Sql', 'Az.Resources', 'Az.Storage', 'Az.KeyVault')
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = @("System.Data.SqlClient.dll")
+# RequiredAssemblies = @()
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
 # ScriptsToProcess = @()
