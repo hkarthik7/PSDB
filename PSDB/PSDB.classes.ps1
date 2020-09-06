@@ -70,6 +70,23 @@ class PSDBConnectionString
         return $StringBuilder.ToString()
     }
 }
+class DatabaseCompleter : IArgumentCompleter {
+    [IEnumerable[CompletionResult]] CompleteArgument(
+        [string] $CommandName,
+        [string] $ParameterName,
+        [string] $WordToComplete,
+        [Language.CommandAst] $CommandAst,
+        [IDictionary] $FakeBoundParameters
+    ) {
+        $results = [List[CompletionResult]]::new()
+        foreach ($value in (_getResources -SqlDatabases)) {
+            if ($value -like "*$WordToComplete*") {
+                $results.Add($value)
+            }
+        }
+        return $results
+    }
+}
 class KeyVaultCompleter : IArgumentCompleter {
     [IEnumerable[CompletionResult]] CompleteArgument(
         [string] $CommandName,
@@ -101,6 +118,7 @@ class PSDBResources {
 }
 class PSDBValidator
 {
+    PSDBValidator() { }
     [bool] SubscriptionValidator([string] $Subscription)
     {
         [bool] $isPresent = $false
@@ -192,6 +210,46 @@ class ResourceGroupCompleter : IArgumentCompleter {
         return $results
     }
 }
+class ResourceGroupValidateAttribute : ValidateArgumentsAttribute {
+    [void] Validate(
+      [object] $arguments,
+      [EngineIntrinsics] $EngineIntrinsics) {
+      # Do not fail on null or empty, leave that to other validation conditions
+      if ([string]::IsNullOrEmpty($arguments)) {
+        return
+      }
+      if ([string]::IsNullOrEmpty([PSDBResources]::ResourceGroups)) {
+        $ResourceGroups = _getResources -ResourceGroups
+      } else {
+        $ResourceGroups = ([PSDBResources]::ResourceGroups).Split(",")
+      }
+      $rgs = $ResourceGroups
+      if ($arguments -notin $rgs) {
+        throw [ValidationMetadataException]::new(
+            "'$arguments' is not a valid resource group. Pass the valid resource group and try again.")
+      }
+    }
+}
+class SqlDatabaseValidateAttribute : ValidateArgumentsAttribute {
+    [void] Validate(
+      [object] $arguments,
+      [EngineIntrinsics] $EngineIntrinsics) {
+      # Do not fail on null or empty, leave that to other validation conditions
+      if ([string]::IsNullOrEmpty($arguments)) {
+        return
+      }
+      if ([string]::IsNullOrEmpty([PSDBResources]::SqlDatabases)) {
+        $SqlDatabases = _getResources -SqlDatabases
+      } else {
+        $SqlDatabases = ([PSDBResources]::SqlDatabases).Split(",")
+      }
+      $databases = $SqlDatabases
+      if ($arguments -notin $databases) {
+        throw [ValidationMetadataException]::new(
+            "'$arguments' is not a valid Sql database. Pass the valid Sql database name and try again.")
+      }
+    }
+}
 class SqlServerCompleter : IArgumentCompleter {
     [IEnumerable[CompletionResult]] CompleteArgument(
         [string] $CommandName,
@@ -207,6 +265,26 @@ class SqlServerCompleter : IArgumentCompleter {
             }
         }
         return $results
+    }
+}
+class SqlServerValidateAttribute : ValidateArgumentsAttribute {
+    [void] Validate(
+      [object] $arguments,
+      [EngineIntrinsics] $EngineIntrinsics) {
+      # Do not fail on null or empty, leave that to other validation conditions
+      if ([string]::IsNullOrEmpty($arguments)) {
+        return
+      }
+      if ([string]::IsNullOrEmpty([PSDBResources]::SqlServers)) {
+        $SqlServers = _getResources -SqlServers
+      } else {
+        $SqlServers = ([PSDBResources]::SqlServers).Split(",")
+      }
+      $servers = $SqlServers
+      if ($arguments -notin $servers) {
+        throw [ValidationMetadataException]::new(
+            "'$arguments' is not a valid Sql server. Pass the valid Sql server name and try again.")
+      }
     }
 }
 class StorageAccountCompleter : IArgumentCompleter {
@@ -241,6 +319,28 @@ class SubscriptionCompleter : IArgumentCompleter {
             }
         }
         return $results
+    }
+}
+class SubscriptionValidateAttribute : ValidateArgumentsAttribute {
+    [void] Validate(
+      [object] $arguments,
+      [EngineIntrinsics] $EngineIntrinsics) {
+      # Do not fail on null or empty, leave that to other validation conditions
+      if ([string]::IsNullOrEmpty($arguments)) {
+        return
+      }
+      if ([string]::IsNullOrEmpty([PSDBResources]::Subscriptions)) {
+        $subscriptions = (Get-AzSubscription -WarningAction SilentlyContinue).Name
+      } else {
+        $subscriptions = ([PSDBResources]::ResourceGroups).Split(",")
+      }
+      $SubscriptionsIds = (Get-AzSubscription -WarningAction SilentlyContinue).Id
+      $Names = $subscriptions
+      if (($arguments -notin $Names) -and ($arguments -notin $SubscriptionsIds)) {
+        throw [ValidationMetadataException]::new(
+            "'$arguments' is not a valid subscription name or id. Valid subscriptions are: '" +
+            ($subscriptions -join "', '") + "'")
+      }
     }
 }
 

@@ -20,7 +20,8 @@ function _getResources {
         [switch] $ResourceGroups,
         [switch] $SqlServers,
         [switch] $StorageAccounts,
-        [switch] $KeyVaults
+        [switch] $KeyVaults,
+        [switch] $SqlDatabases
     )
     if ($ResourceGroups) {
         $rsgs = $env:PSDB_RESOURCEGROUPS -split ","
@@ -68,6 +69,19 @@ function _getResources {
             return [PSDBResources]::KeyVaults
         } else {
             return $kvs
+        }
+    }
+    if ($SqlDatabases) {
+        $dbs = $env:PSDB_DATABASES -split ","
+        if (-not $dbs) {
+            $resources = Get-AzResource
+            $databases = $resources | Where-Object {$_.ResourceType -eq "Microsoft.Sql/servers/databases"} | Select-Object Name
+            $databases = $databases | Where-Object { $_.Name -notlike "*master*" }
+            _setDefaultResource -ResourceName "DATABASES" -Resources $databases.Name.Split("/")[1]
+            [PSDBResources]::SqlDatabases = $env:PSDB_DATABASES.Split(",")
+            return [PSDBResources]::SqlDatabases
+        } else {
+            return $dbs
         }
     }
     return Get-AzResource
@@ -123,13 +137,17 @@ function Export-PSDBSqlDatabase {
     [Alias("Export")]
     Param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [ResourceGroupValidateAttribute()]
         [ArgumentCompleter([ResourceGroupCompleter])]
         [ValidateNotNullOrEmpty()]
         [string]$ResourceGroupName,
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
+        [SqlDatabaseValidateAttribute()]
+        [ArgumentCompleter([DatabaseCompleter])]
         [ValidateNotNullOrEmpty()]
         [string]$DatabaseName,
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [SqlServerValidateAttribute()]
         [ArgumentCompleter([SqlServerCompleter])]
         [ValidateNotNullOrEmpty()]
         [string]$ServerName,
@@ -142,6 +160,7 @@ function Export-PSDBSqlDatabase {
         [ValidateNotNullOrEmpty()]
         [string]$StorageContainerName,
         [Parameter(HelpMessage = "Provide the name of blob that you want to save as.")]
+        [ValidateNotNullOrEmpty()]
         [string] $BlobName,
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
@@ -150,7 +169,9 @@ function Export-PSDBSqlDatabase {
         [ValidateNotNullOrEmpty()]
         [securestring] $AdministratorLoginPassword,
         [Parameter(Mandatory = $false, HelpMessage = "Provide the subscription name if exported .bacpac file have to be saved in different subscription.")]
+        [SubscriptionValidateAttribute()]
         [ArgumentCompleter([SubscriptionCompleter])]
+        [ValidateNotNullOrEmpty()]
         [string] $Subscription
     )
     process {
@@ -216,8 +237,10 @@ function Get-PSDBDatabaseData {
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true,
             HelpMessage = "Provide the database connection string.")]
+        [ValidateNotNullOrEmpty()]
         [string] $ConnectionString,
         [Parameter(Mandatory = $true, Position = 1, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [string] $Query
     )
     process {
@@ -250,6 +273,7 @@ function Get-PSDBImportExportStatus {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [string] $StatusLink,
         [int] $Interval = 5,
         [int] $TimeOut = 300,
@@ -354,6 +378,7 @@ function Import-PSDBSqlDatabase {
         [ValidateNotNullOrEmpty()]
         [string] $ImportDatabaseAs,
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [SqlServerValidateAttribute()]
         [ArgumentCompleter([SqlServerCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $ServerName,
@@ -369,6 +394,7 @@ function Import-PSDBSqlDatabase {
         [ValidateNotNullOrEmpty()]
         [string] $StorageContainerName,
         [Parameter(HelpMessage = "Provide the name of .bacpac file. If not provided it tries to retrieve latest '.bacpac' file from provided container.")]
+        [ValidateNotNullOrEmpty()]
         [string] $BacpacName,
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateNotNullOrEmpty()]
@@ -377,7 +403,9 @@ function Import-PSDBSqlDatabase {
         [ValidateNotNullOrEmpty()]
         [securestring] $AdministratorLoginPassword,
         [Parameter(Mandatory = $false, HelpMessage = "Provide the subscription name to import .bacpac file from.")]
+        [SubscriptionValidateAttribute()]
         [ArgumentCompleter([SubscriptionCompleter])]
+        [ValidateNotNullOrEmpty()]
         [string] $Subscription
     )
     process {
@@ -452,8 +480,10 @@ function Invoke-PSDBDatabaseQuery {
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true,
             HelpMessage = "Provide the database connection string.")]
+        [ValidateNotNullOrEmpty()]
         [string] $ConnectionString,
         [Parameter(Mandatory = $true, Position = 1, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
         [string] $Query
     )
     process {
@@ -492,6 +522,7 @@ function New-PSDBConnectionString {
         [Parameter(Mandatory = $true, ParameterSetName = "MARSEnabled")]
         [Parameter(Mandatory = $true, ParameterSetName = "AADIntegrated")]
         [Parameter(Mandatory = $true, ParameterSetName = "AAD")]
+        [ArgumentCompleter([DatabaseCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $DatabaseName,
         [Parameter(Mandatory = $true, ParameterSetName = "Standard")]
@@ -563,6 +594,7 @@ function Set-PSDBDefault {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "Low")]
     param (
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
+        [SubscriptionValidateAttribute()]
         [ArgumentCompleter([SubscriptionCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $Subscription,
@@ -570,6 +602,7 @@ function Set-PSDBDefault {
         [ArgumentCompleter([ResourceGroupCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $ResourceGroupName,
+        [SqlServerValidateAttribute()]
         [ArgumentCompleter([SqlServerCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $ServerName,
