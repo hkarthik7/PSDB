@@ -25,7 +25,8 @@ function _getResources {
         [switch] $ResourceGroups,
         [switch] $SqlServers,
         [switch] $StorageAccounts,
-        [switch] $KeyVaults
+        [switch] $KeyVaults,
+        [switch] $SqlDatabases
     )
 
     if ($ResourceGroups) {
@@ -85,6 +86,22 @@ function _getResources {
             return [PSDBResources]::KeyVaults
         } else {
             return $kvs
+        }
+    }
+
+    if ($SqlDatabases) {
+        $dbs = $env:PSDB_DATABASES -split ","
+        if (-not $dbs) {
+            $resources = Get-AzResource
+            $databases = $resources | Where-Object {$_.ResourceType -eq "Microsoft.Sql/servers/databases"} | Select-Object Name
+            $databases = $databases | Where-Object { $_.Name -notlike "*master*" }
+
+            _setDefaultResource -ResourceName "DATABASES" -Resources $databases.Name.Split("/")[1]
+            [PSDBResources]::SqlDatabases = $env:PSDB_DATABASES.Split(",")
+
+            return [PSDBResources]::SqlDatabases
+        } else {
+            return $dbs
         }
     }
 
