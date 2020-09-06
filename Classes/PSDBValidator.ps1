@@ -1,5 +1,6 @@
 class PSDBValidator
 {
+    PSDBValidator() { }
     
     [bool] SubscriptionValidator([string] $Subscription)
     {
