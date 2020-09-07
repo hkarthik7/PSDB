@@ -104,6 +104,25 @@ class KeyVaultCompleter : IArgumentCompleter {
         return $results
     }
 }
+class KeyVaultValidateAttribute : ValidateArgumentsAttribute {
+    [void] Validate(
+      [object] $arguments,
+      [EngineIntrinsics] $EngineIntrinsics) {
+      # Do not fail on null or empty, leave that to other validation conditions
+      if ([string]::IsNullOrEmpty($arguments)) {
+        return
+      }
+      if ([string]::IsNullOrEmpty([PSDBResources]::KeyVaults)) {
+        $KeyVaults = _getResources -KeyVaults
+      } else {
+        $KeyVaults = ([PSDBResources]::KeyVaults).Split(",")
+      }
+      if ($arguments -notin $KeyVaults) {
+        throw [ValidationMetadataException]::new(
+            "'$arguments' is not a valid key vault. Pass the valid key vault name and try again.")
+      }
+    }
+}
 class PSDBResources {
     static [string] $Subscription           = $null
     static [object] $Subscriptions          = $null
@@ -115,83 +134,6 @@ class PSDBResources {
     static [object] $DatabaseName           = $null
     static [object] $StorageAccounts        = $null
     static [object] $KeyVaults              = $null
-}
-class PSDBValidator
-{
-    PSDBValidator() { }
-    [bool] SubscriptionValidator([string] $Subscription)
-    {
-        [bool] $isPresent = $false
-        $SubscriptionIds = (Get-AzSubscription -WarningAction SilentlyContinue).Id
-        if (((_getDefaultSubscriptions) -contains $Subscription) -or ($SubscriptionIds -contains $Subscription)) {
-            $isPresent = $true
-        }
-        return $isPresent
-    }
-    [bool] ResourceGroupValidator([string] $ResourceGroupName)
-    {
-        [bool] $isPresent = $false
-        $ResourceGroups = _getResources -ResourceGroups
-        if ($ResourceGroups -contains $ResourceGroupName) {
-            $isPresent = $true
-        }
-        return $isPresent
-    }
-    [bool] StorageAccountValidator([string] $StorageAccountName)
-    {
-        [bool] $isPresent = $false
-        $StorageAccounts = _getResources -StorageAccounts
-        if ($StorageAccounts -contains $StorageAccountName) {
-            $isPresent = $true
-        }
-        return $isPresent
-    }
-    [bool] StorageContainerValidator([string] $StorageAccountName, [string] $StorageAccountContainer)
-    {
-        [bool] $isPresent = $false
-        $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey (_getStorageAccountKey $StorageAccountName)
-        $Container = Get-AzStorageContainer -Name $StorageAccountContainer -Context $Context
-        if (![string]::IsNullOrWhiteSpace($Container.Name)) {
-            $isPresent = $true
-        }
-        return $isPresent
-    }
-    [bool] SqlServerValidator([string] $SqlServerName)
-    {
-        [bool] $isPresent = $false
-        $SqlServers = _getResources -SqlServers
-        if ($SqlServers -contains $SqlServerName) {
-            $isPresent = $true
-        }
-        return $isPresent
-    }
-    [bool] DatabaseValidator([string] $DatabaseName, [string] $SqlServerName, [string] $ResourceGroupName)
-    {
-        [bool] $isPresent = $false
-        $DB = Get-AzSqlDatabase -ResourceGroupName $ResourceGroupName -DatabaseName $DatabaseName -ServerName $SqlServerName
-        if (![string]::IsNullOrWhiteSpace($DB.DatabaseName)) {
-            $isPresent = $true
-        }
-        return $isPresent
-    }
-    [bool] KeyVaultValidator([string] $VaultName)
-    {
-        [bool] $isPresent = $false
-        $Vaults = _getResources -KeyVaults
-        if ($Vaults -contains $VaultName) {
-            $isPresent = $true
-        }
-        return $isPresent
-    }
-    [bool] KeyVaultSecretValidator([string] $VaultName, [string] $SecretName)
-    {
-        [bool] $isPresent = $false
-        $Secret = Get-AzKeyVaultSecret -VaultName $VaultName -Name $SecretName -
-        if (![string]::IsNullOrWhiteSpace($Secret.Name)) {
-            $isPresent = $true
-        }
-        return $isPresent
-    }
 }
 class ResourceGroupCompleter : IArgumentCompleter {
     [IEnumerable[CompletionResult]] CompleteArgument(
@@ -223,8 +165,7 @@ class ResourceGroupValidateAttribute : ValidateArgumentsAttribute {
       } else {
         $ResourceGroups = ([PSDBResources]::ResourceGroups).Split(",")
       }
-      $rgs = $ResourceGroups
-      if ($arguments -notin $rgs) {
+      if ($arguments -notin $ResourceGroups) {
         throw [ValidationMetadataException]::new(
             "'$arguments' is not a valid resource group. Pass the valid resource group and try again.")
       }
@@ -243,8 +184,7 @@ class SqlDatabaseValidateAttribute : ValidateArgumentsAttribute {
       } else {
         $SqlDatabases = ([PSDBResources]::SqlDatabases).Split(",")
       }
-      $databases = $SqlDatabases
-      if ($arguments -notin $databases) {
+      if ($arguments -notin $SqlDatabases) {
         throw [ValidationMetadataException]::new(
             "'$arguments' is not a valid Sql database. Pass the valid Sql database name and try again.")
       }
@@ -280,8 +220,7 @@ class SqlServerValidateAttribute : ValidateArgumentsAttribute {
       } else {
         $SqlServers = ([PSDBResources]::SqlServers).Split(",")
       }
-      $servers = $SqlServers
-      if ($arguments -notin $servers) {
+      if ($arguments -notin $SqlServers) {
         throw [ValidationMetadataException]::new(
             "'$arguments' is not a valid Sql server. Pass the valid Sql server name and try again.")
       }
@@ -302,6 +241,25 @@ class StorageAccountCompleter : IArgumentCompleter {
             }
         }
         return $results
+    }
+}
+class StorageAcountValidateAttribute : ValidateArgumentsAttribute {
+    [void] Validate(
+      [object] $arguments,
+      [EngineIntrinsics] $EngineIntrinsics) {
+      # Do not fail on null or empty, leave that to other validation conditions
+      if ([string]::IsNullOrEmpty($arguments)) {
+        return
+      }
+      if ([string]::IsNullOrEmpty([PSDBResources]::StorageAccounts)) {
+        $StorageAccounts = _getResources -StorageAccounts
+      } else {
+        $StorageAccounts = ([PSDBResources]::StorageAccounts).Split(",")
+      }
+      if ($arguments -notin $StorageAccounts) {
+        throw [ValidationMetadataException]::new(
+            "'$arguments' is not a valid storage account. Pass the valid storage account name and try again.")
+      }
     }
 }
 class SubscriptionCompleter : IArgumentCompleter {

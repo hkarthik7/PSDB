@@ -132,6 +132,13 @@ function _getLatestBacPacFile {
     $blob = Get-AzStorageBlob -Blob "*.bacpac" -Container $StorageContainerName -Context $context
     return ($blob | Sort-Object -Descending | Select-Object -First 1).Name
 }
+function _convertToPlainText {
+    param (
+        [securestring] $Password
+    )
+    $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Password)
+    return [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+}
 function Export-PSDBSqlDatabase {
     [CmdletBinding()]
     [Alias("Export")]
@@ -153,6 +160,7 @@ function Export-PSDBSqlDatabase {
         [string]$ServerName,
         [string]$StorageKeyType = "StorageAccessKey",
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [StorageAcountValidateAttribute()]
         [ArgumentCompleter([StorageAccountCompleter])]
         [ValidateNotNullOrEmpty()]
         [string]$StorageAccountName,
@@ -176,38 +184,52 @@ function Export-PSDBSqlDatabase {
     )
     process {
         try {
-            #region start DB export
-            if ($PSBoundParameters["Subscription"]) {
-                $context = (Get-AzContext).Subscription.Name
-                if ($context -ne $Subscription) {
-                    Set-PSDBDefault -Subscription $Subscription
-                    $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                    $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                    Set-PSDBDefault -Subscription $context
+            try {
+                $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey (_getStorageAccountKey $StorageAccountName)
+                $Container = Get-AzStorageContainer -Name $StorageContainerName -Context $Context -ErrorAction SilentlyContinue
+            }
+            catch {
+                $Container = $null
+            }
+            if ([string]::IsNullOrEmpty($Container)) {
+                $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
+                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
+            else {
+                #region start DB export
+                if ($PSBoundParameters["Subscription"]) {
+                    $context = (Get-AzContext).Subscription.Name
+                    if ($context -ne $Subscription) {
+                        Set-PSDBDefault -Subscription $Subscription
+                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                        Set-PSDBDefault -Subscription $context
+                    } else {
+                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                    }
                 } else {
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
                 }
-            } else {
-                $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                if (-not $BlobName) {
+                    $BlobName = _getBacpacName -DatabaseName $DatabaseName
+                }
+                $splat = @{
+                    DatabaseName = $DatabaseName
+                    ServerName = $ServerName
+                    StorageKeyType = $StorageKeyType
+                    StorageKey = $storageKey
+                    StorageUri = "$storageUri/$BlobName"
+                    ResourceGroupName = $ResourceGroupName
+                    AdministratorLogin = $AdministratorLogin
+                    AdministratorLoginPassword = $AdministratorLoginPassword
+                }
+                $sqlExport = New-AzSqlDatabaseExport @splat
+                return $sqlExport.OperationStatusLink
+                #end region start DB export
             }
-            if (-not $BlobName) {
-                $BlobName = _getBacpacName -DatabaseName $DatabaseName
-            }
-            $splat = @{
-                DatabaseName = $DatabaseName
-                ServerName = $ServerName
-                StorageKeyType = $StorageKeyType
-                StorageKey = $storageKey
-                StorageUri = "$storageUri/$BlobName"
-                ResourceGroupName = $ResourceGroupName
-                AdministratorLogin = $AdministratorLogin
-                AdministratorLoginPassword = $AdministratorLoginPassword
-            }
-            $sqlExport = New-AzSqlDatabaseExport @splat
-            return $sqlExport.OperationStatusLink
-            #end region start DB export
         }
         catch {
             throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
@@ -317,6 +339,7 @@ function Get-PSDBKVSecret {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [KeyVaultValidateAttribute()]
         [ArgumentCompleter([KeyVaultCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $VaultName,
@@ -329,40 +352,63 @@ function Get-PSDBKVSecret {
     )
     process {
         try {
-            if ($PSBoundParameters["Version"]) {
-                $kvSecret = Get-AzKeyVaultSecret -VaultName $VaultName -Name $SecretName -Version $Version
-                if ($AsPlainText.IsPresent) {
-                    if ($kvSecret.Enabled) {
-                        return $kvSecret.SecretValueText
-                    } else {
-                        Write-Error "Given secret $($SecretName) is not enabled.."
-                    }
-                } else {
-                    return $kvSecret.SecretValue
-                }
+            $kvSecret = Get-AzKeyVaultSecret -VaultName $VaultName -Name $SecretName -IncludeVersions -ErrorAction stop
+            if ($null -eq $kvSecret) {
+                $Message = "Cannot validate argument on parameter 'SecretName'. '$($SecretName)' is not a valid SecretName. Pass the valid secret name and try again."
+                $ErrorId = "InvalidArgument,PSDBKVSecret\Get-PSDBKVSecret"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
             }
             else {
-                $kvSecrets = Get-AzKeyVaultSecret -VaultName $VaultName -Name $SecretName -IncludeVersions
-                $secrets = @()
-                if ($AsPlainText.IsPresent) {
-                    $kvSecrets | ForEach-Object {
-                        if ($PSItem.Enabled) {
-                            $secrets += Get-AzKeyVaultSecret -VaultName $VaultName -Name $SecretName -Version $PSItem.Version
+                if ($PSBoundParameters["Version"]) {
+                    $secret = $kvSecret | Where-Object { $_.Version -eq $Version }
+                    if ($null -eq $secret) {
+                        $Message = "Cannot validate argument on parameter 'Version'. '$($Version)' is not a valid Version number. Pass the valid version number and try again."
+                        $ErrorId = "InvalidArgument,PSDBKVSecret\Get-PSDBKVSecret"
+                        Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                    }
+                    else {
+                        if ($AsPlainText.IsPresent) {
+                            if ($secret.Enabled) {
+                                $kv = Get-AzKeyVaultSecret -VaultName $secret.VaultName -Name $secret.Name -Version $secret.Version
+                                $PSCmdlet.WriteObject((_convertToPlainText ($kv.SecretValue -as [securestring])))
+                            } else {
+                                $Message = "Cannot validate argument on parameter 'SecretName'. '$($SecretName)' is not enabled. Pass the valid secret name and try again."
+                                $ErrorId = "InvalidArgument,PSDBKVSecret\Get-PSDBKVSecret"
+                                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                            }
+                        } else {
+                            $kv = Get-AzKeyVaultSecret -VaultName $secret.VaultName -Name $secret.Name -Version $secret.Version
+                            $PSCmdlet.WriteObject($kv.SecretValue)
                         }
                     }
-                    return $secrets.SecretValueText
-                } else {
-                    $kvSecrets | ForEach-Object {
-                        if ($PSItem.Enabled) {
-                            $secrets += Get-AzKeyVaultSecret -VaultName $VaultName -Name $SecretName -Version $PSItem.Version
+                }
+                else {
+                    if ($AsPlainText.IsPresent) {
+                        $kvSecret | ForEach-Object {
+                            if ($_.Enabled) {
+                                $kv = Get-AzKeyVaultSecret -VaultName $_.VaultName -Name $_.Name -Version $_.Version
+                                $PSCmdlet.WriteObject((_convertToPlainText ($kv.SecretValue -as [securestring])))
+                            }
+                        }
+                    } else {
+                        $kvSecret | ForEach-Object {
+                            if ($_.Enabled) {
+                                $kv = Get-AzKeyVaultSecret -VaultName $_.VaultName -Name $_.Name -Version $_.Version
+                                $PSCmdlet.WriteObject($kv.SecretValue)
+                            }
                         }
                     }
-                    return $secrets.SecretValue
                 }
             }
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
+            $content = $_.Exception.Response.Content
+            $content = if ($content) { $content | ConvertFrom-Json }
+            if ($content.error.innererror.code -eq "SecretDisabled") {
+                $Message = "Cannot validate argument on parameter 'SecretName'. There is no active current version of '$($SecretName)'. Pass the valid secret name and try again."
+                $ErrorId = "InvalidArgument,PSDBKVSecret\Get-PSDBKVSecret"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
         }
     }
 }
@@ -387,6 +433,7 @@ function Import-PSDBSqlDatabase {
         [string] $ServiceObjectiveName,
         [string] $DatabaseMaxSizeBytes,
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [StorageAcountValidateAttribute()]
         [ArgumentCompleter([StorageAccountCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $StorageAccountName,
@@ -410,20 +457,40 @@ function Import-PSDBSqlDatabase {
     )
     process {
         try {
-            #region start DB import
-            if ($PSBoundParameters["Subscription"]) {
-                $context = (Get-AzContext).Subscription.Name
-                if ($context -ne $Subscription) {
-                    Set-PSDBDefault -Subscription $Subscription
-                    $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                    $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                    # Placing this check here because when I'm retrieving the information for different subscription it has to
-                    # fetch the correct latest bacpac file. If this is out of this check then the context will be different and
-                    # I'm receiving error.
-                    if (-not $BacpacName) {
-                        $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+            try {
+                $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey (_getStorageAccountKey $StorageAccountName)
+                $Container = Get-AzStorageContainer -Name $StorageContainerName -Context $Context -ErrorAction SilentlyContinue
+            }
+            catch {
+                $Container = $null
+            }
+            if ([string]::IsNullOrEmpty($Container)) {
+                $Message = "Cannot validate the argument StorageContainerName. '$($StorageContainerName)' is not a valid storage container name. Pass the correct value and try again."
+                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
+            else {
+                #region start DB import
+                if ($PSBoundParameters["Subscription"]) {
+                    $context = (Get-AzContext).Subscription.Name
+                    if ($context -ne $Subscription) {
+                        Set-PSDBDefault -Subscription $Subscription
+                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                        # Placing this check here because when I'm retrieving the information for different subscription it has to
+                        # fetch the correct latest bacpac file. If this is out of this check then the context will be different and
+                        # I'm receiving error.
+                        if (-not $BacpacName) {
+                            $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                        }
+                        Set-PSDBDefault -Subscription $context
+                    } else {
+                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                        if (-not $BacpacName) {
+                            $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                        }
                     }
-                    Set-PSDBDefault -Subscription $context
                 } else {
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
@@ -431,40 +498,34 @@ function Import-PSDBSqlDatabase {
                         $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
                     }
                 }
-            } else {
-                $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                if (-not $BacpacName) {
-                    $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                if (-not $Edition) {
+                    $Edition = "Standard"
                 }
+                if (-not $DatabaseMaxSizeBytes) {
+                    $DatabaseMaxSizeBytes = "5000000"
+                }
+                if (-not $ServiceObjectiveName) {
+                    $ServiceObjectiveName = "S0"
+                }
+                if (-not $ImportDatabaseAs) {
+                    $ImportDatabaseAs = $BacpacName.Replace(".bacpac", "")
+                }
+                $splat = @{
+                    DatabaseName = $ImportDatabaseAs
+                    ResourceGroupName = $ResourceGroupName
+                    ServerName = $ServerName
+                    StorageKeyType = "StorageAccessKey"
+                    StorageKey = $storageKey
+                    StorageUri = "$storageUri/$BacpacName"
+                    Edition = $Edition
+                    ServiceObjectiveName = $ServiceObjectiveName
+                    DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
+                    AdministratorLogin = $AdministratorLogin
+                    AdministratorLoginPassword = $AdministratorLoginPassword
+                }
+                $sqlImport = New-AzSqlDatabaseImport @splat
+                return $sqlImport.OperationStatusLink
             }
-            if (-not $Edition) {
-                $Edition = "Standard"
-            }
-            if (-not $DatabaseMaxSizeBytes) {
-                $DatabaseMaxSizeBytes = "5000000"
-            }
-            if (-not $ServiceObjectiveName) {
-                $ServiceObjectiveName = "S0"
-            }
-            if (-not $ImportDatabaseAs) {
-                $ImportDatabaseAs = $BacpacName.Replace(".bacpac", "")
-            }
-            $splat = @{
-                DatabaseName = $ImportDatabaseAs
-                ResourceGroupName = $ResourceGroupName
-                ServerName = $ServerName
-                StorageKeyType = "StorageAccessKey"
-                StorageKey = $storageKey
-                StorageUri = "$storageUri/$BacpacName"
-                Edition = $Edition
-                ServiceObjectiveName = $ServiceObjectiveName
-                DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
-                AdministratorLogin = $AdministratorLogin
-                AdministratorLoginPassword = $AdministratorLoginPassword
-            }
-            $sqlImport = New-AzSqlDatabaseImport @splat
-            return $sqlImport.OperationStatusLink
         }
         catch {
             throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
@@ -606,6 +667,8 @@ function Set-PSDBDefault {
         [ArgumentCompleter([SqlServerCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $ServerName,
+        [SqlDatabaseValidateAttribute()]
+        [ArgumentCompleter([DatabaseCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $DatabaseName
     )
