@@ -16,9 +16,7 @@ class SqlDatabaseValidateAttribute : ValidateArgumentsAttribute {
         $SqlDatabases = ([PSDBResources]::SqlDatabases).Split(",")
       }
 
-      $databases = $SqlDatabases
-
-      if ($arguments -notin $databases) {
+      if ($arguments -notin $SqlDatabases) {
         throw [ValidationMetadataException]::new(
             "'$arguments' is not a valid Sql database. Pass the valid Sql database name and try again.")
       }

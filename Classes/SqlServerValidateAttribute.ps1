@@ -16,9 +16,7 @@ class SqlServerValidateAttribute : ValidateArgumentsAttribute {
         $SqlServers = ([PSDBResources]::SqlServers).Split(",")
       }
 
-      $servers = $SqlServers
-
-      if ($arguments -notin $servers) {
+      if ($arguments -notin $SqlServers) {
         throw [ValidationMetadataException]::new(
             "'$arguments' is not a valid Sql server. Pass the valid Sql server name and try again.")
       }

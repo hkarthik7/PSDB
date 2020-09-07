@@ -15,10 +15,8 @@ class ResourceGroupValidateAttribute : ValidateArgumentsAttribute {
       } else {
         $ResourceGroups = ([PSDBResources]::ResourceGroups).Split(",")
       }
-
-      $rgs = $ResourceGroups
-
-      if ($arguments -notin $rgs) {
+      
+      if ($arguments -notin $ResourceGroups) {
         throw [ValidationMetadataException]::new(
             "'$arguments' is not a valid resource group. Pass the valid resource group and try again.")
       }
