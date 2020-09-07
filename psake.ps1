@@ -1,1 +1,1 @@
-Invoke-psake .\build.ps1
+Invoke-psake .\build.ps1 Clean, Build, Analyze, Test
