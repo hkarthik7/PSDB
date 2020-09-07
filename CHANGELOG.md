@@ -1,3 +1,12 @@
+# 0.1.16
+
+- Update for `Get-PSDBKVSecret` with error handling and code refactor. Removed `SecretValueText` attribute fetcher from
+the function and replaced with helper function to convert the secure string to plain text. `SecretValueText` will be
+deprecated in future module release.
+- Added argument validators for `ResourceGroupName`, `StorageAccount`, `SqlServer`, `Subscription` and `Database.`
+- Function name change for `Set-PSDBDefault` and added argument completer for `Database`.
+- Added warning message suppression for KeyVault cmdlet.
+
 # 0.1.15
 
 - Added helper functions `Get-PSDBConnectionString` and `New-PSDBConnectionString` to get a list of available connection
