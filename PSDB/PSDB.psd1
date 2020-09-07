@@ -72,10 +72,10 @@ RequiredModules = @('Az.Accounts', 'Az.Sql', 'Az.Resources', 'Az.Storage', 'Az.K
 FunctionsToExport = @('Export-PSDBSqlDatabase','Get-PSDBConnectionString','Get-PSDBDatabaseData','Get-PSDBImportExportStatus','Get-PSDBKVSecret','Import-PSDBSqlDatabase','Invoke-PSDBDatabaseQuery','New-PSDBConnectionString','Set-PSDBDefault')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-CmdletsToExport = '*'
+# CmdletsToExport = '*'
 
 # Variables to export from this module
-VariablesToExport = '*'
+# VariablesToExport = '*'
 
 # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
 AliasesToExport = @('Export', 'Import', 'Status')
@@ -95,7 +95,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = 'PSDB', 'AzureSqlImport', 'AzureSqlExport', 'PowerShellAzureSql', 
+        Tags = 'PSDB', 'AzureSqlImport', 'AzureSqlExport', 'PowerShellAzureSql',
                'SqlExport', 'SqlAutomation', 'DatabaseAutomation'
 
         # A URL to the license for this module.
