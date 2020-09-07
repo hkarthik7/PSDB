@@ -166,3 +166,12 @@ function _getLatestBacPacFile {
 
     return ($blob | Sort-Object -Descending | Select-Object -First 1).Name
 }
+
+function _convertToPlainText {
+    param (
+        [securestring] $Password
+    )
+
+    $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Password)
+    return [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+}
