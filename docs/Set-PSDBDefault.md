@@ -14,8 +14,8 @@ Set-PSDBDefault sets the default parameters in current session or process.
 ## SYNTAX
 
 ```
-Set-PSDBDefault [[-Subscription] <String>] [[-ResourceGroupName] <String>] [-ServerName <String>]
- [-DatabaseName <String>] [-Level <String>] [<CommonParameters>]
+Set-PSDBDefault [-Subscription] <String> [[-ResourceGroupName] <String>] [-ServerName <String>]
+ [-DatabaseName <String>] [-WhatIf] [-Confirm] [-Level <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -42,6 +42,37 @@ PS C:\> Set-PSDBDefault -ResourceGroupName "resource group name" -ServerName "Sq
 Once these values are set in current session it is not required to pass these values to export and import functions. It automatically picks up the default values.
 
 ## PARAMETERS
+
+### -Confirm
+Prompts you for confirmation before running the cmdlet.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: cf
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DatabaseName
+
+Provide the Sql database name to set as default value.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -Level
 
@@ -77,25 +108,9 @@ Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
-### -Subscription
+### -ServerName
 
-Provide the default subscription name to set.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 0
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
-```
-
-### -DatabaseName
-
-Provide the Sql database name to set as default value.
+Provide the Sql server name.
 
 ```yaml
 Type: String
@@ -109,14 +124,29 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ServerName
+### -Subscription
 
-Provide the Sql server name.
+Provide the default subscription name to set.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
+
+Required: True
+Position: 0
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -WhatIf
+Shows what would happen if the cmdlet runs. The cmdlet is not run.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: wi
 
 Required: False
 Position: Named

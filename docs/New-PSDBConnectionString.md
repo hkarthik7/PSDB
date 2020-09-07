@@ -8,20 +8,20 @@ schema: 2.0.0
 # New-PSDBConnectionString
 
 ## SYNOPSIS
-New-PSDBConnectionString helps you to create a connection string for Azure Sql database.
+`New-PSDBConnectionString` helps you to create a connection string for Azure Sql database.
 
 ## SYNTAX
+
+### AADIntegrated (Default)
+```
+New-PSDBConnectionString -SqlServerName <String> -DatabaseName <String> -Authentication <String>
+ [<CommonParameters>]
+```
 
 ### AAD
 ```
 New-PSDBConnectionString -SqlServerName <String> -DatabaseName <String> -Credential <PSCredential>
  -Authentication <String> [<CommonParameters>]
-```
-
-### AADIntegrated
-```
-New-PSDBConnectionString -SqlServerName <String> -DatabaseName <String> -Authentication <String>
- [<CommonParameters>]
 ```
 
 ### MARSEnabled
@@ -43,7 +43,7 @@ New-PSDBConnectionString -DataSource <String> -InitialCatalog <String> [-Integra
 ```
 
 ## DESCRIPTION
-New-PSDBConnectionString helps you to create five different types of connection string which can be used to connect database.
+`New-PSDBConnectionString` helps you to create five different types of connection string which can be used to connect database.
 These connection strings are available in [Connection Strings Website](https://www.connectionstrings.com/sql-server/) and the examples
 which are pertaining to Azure Sql can be created with this function.
 
@@ -64,6 +64,20 @@ This returns below connection string;
 "Server=tcp:sql-01,1433;Database=sql-db-01;User ID=sqladmin@sql-01;Password=SqlPassword;Trusted_Connection=False;Encrypt=True;"
 ```
 
+### Example 2
+```powershell
+# Create Azure Active Directory integrated with username and password connection string
+PS C:\> $Cred = New-Object System.Management.Automation.PSCredential("domain\sqladmin", ("SqlPassword" | ConvertTo-SecureString -AsPlainText -Force))
+PS C:\> New-PSDBConnectionString `
+            -SqlServerName "sql-01" `
+            -DatabaseName "sql-db-01" `
+            -Authentication 'Active Directory Password' `
+            -Credential $Cred
+
+This returns below connection string; 
+"Server=tcp:sql-01,1433;Authentication=Active Directory Password;Database=sql-db-01;UID=sqladmin@domain;Password=SqlPassword;"
+```
+
 Tab completion is available for SqlServerName. Run `Get-PSDBConnectionString` to know the list of Connection string that can be formed with this
 function.
 
@@ -74,7 +88,7 @@ Provide the authentication type.
 
 ```yaml
 Type: String
-Parameter Sets: AAD, AADIntegrated
+Parameter Sets: AADIntegrated, AAD
 Aliases:
 Accepted values: Active Directory Integrated, Active Directory Password
 
@@ -136,7 +150,7 @@ Provide the DatabaseName.
 
 ```yaml
 Type: String
-Parameter Sets: AAD, AADIntegrated, MARSEnabled, Standard
+Parameter Sets: AADIntegrated, AAD, MARSEnabled, Standard
 Aliases:
 
 Required: True
@@ -196,7 +210,7 @@ Provide the SqlServerName.
 
 ```yaml
 Type: String
-Parameter Sets: AAD, AADIntegrated, MARSEnabled, Standard
+Parameter Sets: AADIntegrated, AAD, MARSEnabled, Standard
 Aliases:
 
 Required: True

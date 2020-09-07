@@ -9,7 +9,7 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
-Export-PSDBSqlDatabase is a wrapper for New-AzSqlDatabaseExport cmdlet with tab completion for mandatory parameters.
+`Export-PSDBSqlDatabase` is a wrapper for `New-AzSqlDatabaseExport` cmdlet with tab completion for mandatory parameters.
 
 ## SYNTAX
 
@@ -22,9 +22,11 @@ Export-PSDBSqlDatabase -ResourceGroupName <String> [-DatabaseName] <String> -Ser
 
 ## DESCRIPTION
 
-Export-PSDBSqlDatabase is a wrapper for New-AzSqlDatabaseExport cmdlet with tab completion for mandatory parameters. It helps you export the database as you would do in Azure portal.
+`Export-PSDBSqlDatabase` is a wrapper for `New-AzSqlDatabaseExport` cmdlet with tab completion for mandatory parameters. It helps you export the database as you would do in Azure portal.
 
 You can save the exported .bacpac file in different subscription by providing values to storage account name, container name and the subscription.
+
+Note that if you are saving the .bacpac in different subscription you have to provide the target storage account name that you are going to save the file in.
 
 ## EXAMPLES
 
@@ -38,7 +40,7 @@ PS C:\> Export-PSDBSqlDatabase `
             -AdministratorLoginPassword ('sqlstringpassword' | ConvertTo-SecureString -AsPlainText -Force)
 ```
 
-Run Set-PSDBDefaults to set the resource group name, sql server name and database name as default values. Once this is set it is not required to provide these values at the time of export operation.
+Run `Set-PSDBDefaults` to set the resource group name, sql server name and database name as default values. Once this is set it is not required to provide these values at the time of export operation.
 
 ## PARAMETERS
 

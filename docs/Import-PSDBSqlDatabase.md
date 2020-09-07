@@ -43,7 +43,7 @@ PS C:\> Import-PSDBSqlDatabase `
             -AdministratorLoginPassword $impPswd
 ```
 
-Run Set-PSDBDefaults to set the subscription to which you want to import the database or .bacpac file and set resource groupname, server name as defaults. This way you don't have specify these parameter when you call import function.
+Run Set-PSDBDefault to set the subscription to which you want to import the database or .bacpac file and set resource groupname, server name as defaults. This way you don't have specify these parameter when you call import function.
 
 ## PARAMETERS
 
