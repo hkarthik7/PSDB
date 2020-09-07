@@ -23,6 +23,7 @@ function Export-PSDBSqlDatabase {
         [string]$StorageKeyType = "StorageAccessKey",
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [StorageAcountValidateAttribute()]
         [ArgumentCompleter([StorageAccountCompleter])]
         [ValidateNotNullOrEmpty()]
         [string]$StorageAccountName,
@@ -54,49 +55,65 @@ function Export-PSDBSqlDatabase {
 
         try {
 
-            #region start DB export
+            try {
+                $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey (_getStorageAccountKey $StorageAccountName)
+                $Container = Get-AzStorageContainer -Name $StorageContainerName -Context $Context -ErrorAction SilentlyContinue
+            }
+            catch {
+                $Container = $null
+            }
 
-            if ($PSBoundParameters["Subscription"]) {
-                $context = (Get-AzContext).Subscription.Name
+            if ([string]::IsNullOrEmpty($Container)) {
+                $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
+                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase" 
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
 
-                if ($context -ne $Subscription) {
-                    
-                    Set-PSDBDefault -Subscription $Subscription
+            else {
+                #region start DB export
 
-                    $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                    $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                if ($PSBoundParameters["Subscription"]) {
+                    $context = (Get-AzContext).Subscription.Name
 
-                    Set-PSDBDefault -Subscription $context
+                    if ($context -ne $Subscription) {
+                        
+                        Set-PSDBDefault -Subscription $Subscription
+
+                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+
+                        Set-PSDBDefault -Subscription $context
+                    } else {
+                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                    }
+
                 } else {
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
                 }
 
-            } else {
-                $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                if (-not $BlobName) {
+                    $BlobName = _getBacpacName -DatabaseName $DatabaseName
+                }
+
+                $splat = @{
+                    DatabaseName = $DatabaseName
+                    ServerName = $ServerName
+                    StorageKeyType = $StorageKeyType
+                    StorageKey = $storageKey
+                    StorageUri = "$storageUri/$BlobName"
+                    ResourceGroupName = $ResourceGroupName
+                    AdministratorLogin = $AdministratorLogin
+                    AdministratorLoginPassword = $AdministratorLoginPassword
+                }
+
+                $sqlExport = New-AzSqlDatabaseExport @splat
+
+                return $sqlExport.OperationStatusLink
+
+                #end region start DB export
             }
-
-            if (-not $BlobName) {
-                $BlobName = _getBacpacName -DatabaseName $DatabaseName
-            }
-
-            $splat = @{
-                DatabaseName = $DatabaseName
-                ServerName = $ServerName
-                StorageKeyType = $StorageKeyType
-                StorageKey = $storageKey
-                StorageUri = "$storageUri/$BlobName"
-                ResourceGroupName = $ResourceGroupName
-                AdministratorLogin = $AdministratorLogin
-                AdministratorLoginPassword = $AdministratorLoginPassword
-            }
-
-            $sqlExport = New-AzSqlDatabaseExport @splat
-
-            return $sqlExport.OperationStatusLink
-
-            #end region start DB export
         }
         catch {
             throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
