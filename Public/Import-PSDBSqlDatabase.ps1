@@ -26,6 +26,7 @@ function Import-PSDBSqlDatabase {
         [string] $DatabaseMaxSizeBytes,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [StorageAcountValidateAttribute()]
         [ArgumentCompleter([StorageAccountCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $StorageAccountName,
@@ -56,26 +57,50 @@ function Import-PSDBSqlDatabase {
     process {
         try {
 
-            #region start DB import
+            try {
+                $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey (_getStorageAccountKey $StorageAccountName)
+                $Container = Get-AzStorageContainer -Name $StorageContainerName -Context $Context -ErrorAction SilentlyContinue
+            }
+            catch {
+                $Container = $null
+            }
 
-            if ($PSBoundParameters["Subscription"]) {
-                $context = (Get-AzContext).Subscription.Name
+            if ([string]::IsNullOrEmpty($Container)) {
+                $Message = "Cannot validate the argument StorageContainerName. '$($StorageContainerName)' is not a valid storage container name. Pass the correct value and try again."
+                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase" 
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
 
-                if ($context -ne $Subscription) {
-                    
-                    Set-PSDBDefault -Subscription $Subscription
+            else {
+                #region start DB import
 
-                    $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                    $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                if ($PSBoundParameters["Subscription"]) {
+                    $context = (Get-AzContext).Subscription.Name
 
-                    # Placing this check here because when I'm retrieving the information for different subscription it has to
-                    # fetch the correct latest bacpac file. If this is out of this check then the context will be different and
-                    # I'm receiving error.
-                    if (-not $BacpacName) {
-                        $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                    if ($context -ne $Subscription) {
+                        
+                        Set-PSDBDefault -Subscription $Subscription
+
+                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+
+                        # Placing this check here because when I'm retrieving the information for different subscription it has to
+                        # fetch the correct latest bacpac file. If this is out of this check then the context will be different and
+                        # I'm receiving error.
+                        if (-not $BacpacName) {
+                            $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                        }
+
+                        Set-PSDBDefault -Subscription $context
+
+                    } else {
+                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+
+                        if (-not $BacpacName) {
+                            $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                        }
                     }
-
-                    Set-PSDBDefault -Subscription $context
 
                 } else {
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
@@ -86,48 +111,40 @@ function Import-PSDBSqlDatabase {
                     }
                 }
 
-            } else {
-                $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-
-                if (-not $BacpacName) {
-                    $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                if (-not $Edition) {
+                    $Edition = "Standard"
                 }
+
+                if (-not $DatabaseMaxSizeBytes) {
+                    $DatabaseMaxSizeBytes = "5000000"
+                }
+
+                if (-not $ServiceObjectiveName) {
+                    $ServiceObjectiveName = "S0"
+                }
+
+                if (-not $ImportDatabaseAs) {
+                    $ImportDatabaseAs = $BacpacName.Replace(".bacpac", "")
+                }
+
+                $splat = @{
+                    DatabaseName = $ImportDatabaseAs
+                    ResourceGroupName = $ResourceGroupName
+                    ServerName = $ServerName
+                    StorageKeyType = "StorageAccessKey"
+                    StorageKey = $storageKey
+                    StorageUri = "$storageUri/$BacpacName"
+                    Edition = $Edition
+                    ServiceObjectiveName = $ServiceObjectiveName
+                    DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
+                    AdministratorLogin = $AdministratorLogin
+                    AdministratorLoginPassword = $AdministratorLoginPassword
+                }
+
+                $sqlImport = New-AzSqlDatabaseImport @splat
+
+                return $sqlImport.OperationStatusLink
             }
-
-            if (-not $Edition) {
-                $Edition = "Standard"
-            }
-
-            if (-not $DatabaseMaxSizeBytes) {
-                $DatabaseMaxSizeBytes = "5000000"
-            }
-
-            if (-not $ServiceObjectiveName) {
-                $ServiceObjectiveName = "S0"
-            }
-
-            if (-not $ImportDatabaseAs) {
-                $ImportDatabaseAs = $BacpacName.Replace(".bacpac", "")
-            }
-
-            $splat = @{
-                DatabaseName = $ImportDatabaseAs
-                ResourceGroupName = $ResourceGroupName
-                ServerName = $ServerName
-                StorageKeyType = "StorageAccessKey"
-                StorageKey = $storageKey
-                StorageUri = "$storageUri/$BacpacName"
-                Edition = $Edition
-                ServiceObjectiveName = $ServiceObjectiveName
-                DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
-                AdministratorLogin = $AdministratorLogin
-                AdministratorLoginPassword = $AdministratorLoginPassword
-            }
-
-            $sqlImport = New-AzSqlDatabaseImport @splat
-
-            return $sqlImport.OperationStatusLink
         }
         catch {
             throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
