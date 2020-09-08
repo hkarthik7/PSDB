@@ -54,16 +54,20 @@ Task Test {
 Task createMarkdownHelp {
     Write-Output "Generating Markdown help files"
     # generate markdown files.
+    # module has to be loaded into the session before creating help files.
+    Import-Module .\PSDB -Force
     New-MarkdownHelp -Module $ModuleName -OutputFolder "$root\docs" -ErrorAction SilentlyContinue | Out-Null
 }
 
 Task updateMarkdownHelp {
     Write-Output "Updating Markdown help files"
+    Import-Module .\PSDB -Force
     Update-MarkdownHelp -Path "$root\docs" | Out-Null
 }
 
 Task createExternalHelp {
     Write-Output "Generating External help files"
     # generate help files.
+    Import-Module .\PSDB -Force
     New-ExternalHelp -Path "$root\docs" -OutputPath "$root\$ModuleName\en-US" -Force | Out-Null
 }
