@@ -12,7 +12,6 @@ View the introduction and module usage [here](https://hkarthik7.github.io/powers
 
 You can directly install the module from [PowerShell gallery](https://www.powershellgallery.com/packages/PSDB/0.1.14).
 
-
 ## Release Notes
 
 - [Change Log](CHANGELOG.md)
