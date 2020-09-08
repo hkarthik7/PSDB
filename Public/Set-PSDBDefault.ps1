@@ -11,12 +11,10 @@ function Set-PSDBDefault {
         [ValidateNotNullOrEmpty()]
         [string] $ResourceGroupName,
 
-        [SqlServerValidateAttribute()]
         [ArgumentCompleter([SqlServerCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $ServerName,
 
-        [SqlDatabaseValidateAttribute()]
         [ArgumentCompleter([DatabaseCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $DatabaseName
