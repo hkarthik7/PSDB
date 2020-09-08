@@ -139,11 +139,20 @@ function Import-PSDBSqlDatabase {
                     DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
                     AdministratorLogin = $AdministratorLogin
                     AdministratorLoginPassword = $AdministratorLoginPassword
+                    ErrorAction = "Stop"
                 }
 
-                $sqlImport = New-AzSqlDatabaseImport @splat
-
-                return $sqlImport.OperationStatusLink
+                try {
+                    $sqlImport = New-AzSqlDatabaseImport @splat
+                    return $sqlImport.OperationStatusLink
+                }
+                catch {
+                    if ($_.Exception.Message -match "Login failed") {
+                        $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                        $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                        Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                    }
+                }              
             }
         }
         catch {

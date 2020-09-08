@@ -106,11 +106,21 @@ function Export-PSDBSqlDatabase {
                     ResourceGroupName = $ResourceGroupName
                     AdministratorLogin = $AdministratorLogin
                     AdministratorLoginPassword = $AdministratorLoginPassword
+                    ErrorAction = "Stop"
                 }
 
-                $sqlExport = New-AzSqlDatabaseExport @splat
+                try {
+                    $sqlExport = New-AzSqlDatabaseExport @splat
 
-                return $sqlExport.OperationStatusLink
+                    return $sqlExport.OperationStatusLink
+                }
+                catch {
+                    if ($_.Exception.Message -match "Login failed") {
+                        $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                        $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                        Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                    }
+                }                
 
                 #end region start DB export
             }

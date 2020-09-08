@@ -2,7 +2,6 @@ function Set-PSDBDefault {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "Low")]
     param (
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
-        [SubscriptionValidateAttribute()]
         [ArgumentCompleter([SubscriptionCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $Subscription,
