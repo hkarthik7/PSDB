@@ -1,11 +1,13 @@
 pool:
   vmImage: vs2017-win2016
+
 steps:
-- task: PowerShell@2
-  displayName: 'PowerShell Script'
+- task: AzurePowerShell@5
+  displayName: 'Build Module'
   inputs:
-    targetType: filePath
-    filePath: ./psake.ps1
+    azureSubscription: '$(AzureSubscription)'
+    ScriptPath: psake.ps1
+    azurePowerShellVersion: LatestVersion
 
 - task: ArchiveFiles@2
   displayName: 'Archive Files'
