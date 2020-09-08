@@ -18,9 +18,3 @@ steps:
   displayName: 'Publish Artifact: Build'
   inputs:
     ArtifactName: Build
-
-- task: PublishTestResults@2
-  displayName: 'Publish Test Results'
-  inputs:
-    testResultsFormat: NUnit
-    testResultsFiles: '**/Tests/results/test-results.xml'
