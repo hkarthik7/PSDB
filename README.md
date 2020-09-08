@@ -36,6 +36,10 @@ You can directly install the module from [PowerShell gallery](https://www.powers
 - [New-PSDBConnectionString](https://github.com/hkarthik7/PSDB/blob/master/docs/New-PSDBConnectionString.md)
 - [Set-PSDBDefault](https://github.com/hkarthik7/PSDB/blob/master/docs/Set-PSDBDefault.md)
 
+## Test Results
+
+[![Test Results](/Tests/img/test-results.PNG)](/Tests/img/test-results.PNG)
+
 ## Build Locally
 
 Clone the repo and run .\psake.ps1 which installs the dependencies and runs the default task. This indeed updates the
