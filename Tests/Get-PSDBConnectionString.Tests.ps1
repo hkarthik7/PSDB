@@ -2,7 +2,7 @@ Set-StrictMode -Version Latest
 
 Describe "PSDB" {
     BeforeAll {
-        Import-Module .\PSDB\PSDB.psm1
+        Import-Module .\PSDB\PSDB.psm1 -Force
     }
     Context "Get-PSDBConnectionString" {
         BeforeAll {
