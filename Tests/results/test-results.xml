@@ -1,135 +1,135 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="24" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2020-09-08" time="15:13:49">
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="24" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2020-09-08" time="16:21:55">
   <environment clr-version="4.0.30319.42000" user-domain="IiDDev" cwd="C:\Projects\PSDB" platform="Microsoft Windows Server 2019 Datacenter|C:\windows|\Device\Harddisk0\Partition2" machine-name="IiDDev" nunit-version="2.5.8.0" os-version="10.0.17763" user="IiDadmin" />
   <culture-info current-culture="en-GB" current-uiculture="en-US" />
-  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="23.5736" asserts="0" description="Pester">
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="30.9165" asserts="0" description="Pester">
     <results>
-      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Export-PSDBSqlDatabase.Tests.ps1" executed="True" result="Success" success="True" time="5.6171" asserts="0" description="C:\Projects\PSDB\Tests\Export-PSDBSqlDatabase.Tests.ps1">
+      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Export-PSDBSqlDatabase.Tests.ps1" executed="True" result="Success" success="True" time="0.6451" asserts="0" description="C:\Projects\PSDB\Tests\Export-PSDBSqlDatabase.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="2.7719" asserts="0" description="PSDB">
+          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="0.1873" asserts="0" description="PSDB">
             <results>
-              <test-suite type="TestFixture" name="PSDB.Export-PSDBSqlDatabase" executed="True" result="Success" success="True" time="2.4776" asserts="0" description="PSDB.Export-PSDBSqlDatabase">
+              <test-suite type="TestFixture" name="PSDB.Export-PSDBSqlDatabase" executed="True" result="Success" success="True" time="0.111" asserts="0" description="PSDB.Export-PSDBSqlDatabase">
                 <results>
-                  <test-case description="Should return the status link after triggering the export operation" name="PSDB.Export-PSDBSqlDatabase.Should return the status link after triggering the export operation" time="1.8642" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return the status link after triggering the export operation" name="PSDB.Export-PSDBSqlDatabase.Should return the status link after triggering the export operation" time="0.0401" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
         </results>
       </test-suite>
-      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Get-PSDBConnectionString.Tests.ps1" executed="True" result="Success" success="True" time="0.7144" asserts="0" description="C:\Projects\PSDB\Tests\Get-PSDBConnectionString.Tests.ps1">
+      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Get-PSDBConnectionString.Tests.ps1" executed="True" result="Success" success="True" time="0.2414" asserts="0" description="C:\Projects\PSDB\Tests\Get-PSDBConnectionString.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="0.585" asserts="0" description="PSDB">
+          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="0.1746" asserts="0" description="PSDB">
             <results>
-              <test-suite type="TestFixture" name="PSDB.Get-PSDBConnectionString" executed="True" result="Success" success="True" time="0.4996" asserts="0" description="PSDB.Get-PSDBConnectionString">
+              <test-suite type="TestFixture" name="PSDB.Get-PSDBConnectionString" executed="True" result="Success" success="True" time="0.1014" asserts="0" description="PSDB.Get-PSDBConnectionString">
                 <results>
-                  <test-case description="Should be exactly same as result" name="PSDB.Get-PSDBConnectionString.Should be exactly same as result" time="0.0425" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should return Az Sql Connection strings" name="PSDB.Get-PSDBConnectionString.Should return Az Sql Connection strings" time="0.3213" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should return corresponding value" name="PSDB.Get-PSDBConnectionString.Should return corresponding value" time="0.0777" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should be exactly same as result" name="PSDB.Get-PSDBConnectionString.Should be exactly same as result" time="0.0365" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return Az Sql Connection strings" name="PSDB.Get-PSDBConnectionString.Should return Az Sql Connection strings" time="0.0108" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return corresponding value" name="PSDB.Get-PSDBConnectionString.Should return corresponding value" time="0.0089" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
         </results>
       </test-suite>
-      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Get-PSDBDatabaseData.Tests.ps1" executed="True" result="Success" success="True" time="5.8024" asserts="0" description="C:\Projects\PSDB\Tests\Get-PSDBDatabaseData.Tests.ps1">
+      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Get-PSDBDatabaseData.Tests.ps1" executed="True" result="Success" success="True" time="12.141" asserts="0" description="C:\Projects\PSDB\Tests\Get-PSDBDatabaseData.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="5.639" asserts="0" description="PSDB">
+          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="11.8739" asserts="0" description="PSDB">
             <results>
-              <test-suite type="TestFixture" name="PSDB.Get-PSDBDatabaseData" executed="True" result="Success" success="True" time="5.3705" asserts="0" description="PSDB.Get-PSDBDatabaseData">
+              <test-suite type="TestFixture" name="PSDB.Get-PSDBDatabaseData" executed="True" result="Success" success="True" time="11.798" asserts="0" description="PSDB.Get-PSDBDatabaseData">
                 <results>
-                  <test-case description="Should be exactly same as result" name="PSDB.Get-PSDBDatabaseData.Should be exactly same as result" time="0.1952" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should be of type DataTable" name="PSDB.Get-PSDBDatabaseData.Should be of type DataTable" time="0.1112" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should return corresponding value" name="PSDB.Get-PSDBDatabaseData.Should return corresponding value" time="0.033" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should be exactly same as result" name="PSDB.Get-PSDBDatabaseData.Should be exactly same as result" time="5.8559" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should be of type DataTable" name="PSDB.Get-PSDBDatabaseData.Should be of type DataTable" time="2.4685" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return corresponding value" name="PSDB.Get-PSDBDatabaseData.Should return corresponding value" time="3.3859" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
         </results>
       </test-suite>
-      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Get-PSDBImportExportStatus.Tests.ps1" executed="True" result="Success" success="True" time="0.4904" asserts="0" description="C:\Projects\PSDB\Tests\Get-PSDBImportExportStatus.Tests.ps1">
+      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Get-PSDBImportExportStatus.Tests.ps1" executed="True" result="Success" success="True" time="0.2014" asserts="0" description="C:\Projects\PSDB\Tests\Get-PSDBImportExportStatus.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="0.3535" asserts="0" description="PSDB">
+          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="0.1448" asserts="0" description="PSDB">
             <results>
-              <test-suite type="TestFixture" name="PSDB.Get-PSDBImportExportStatus" executed="True" result="Success" success="True" time="0.1732" asserts="0" description="PSDB.Get-PSDBImportExportStatus">
+              <test-suite type="TestFixture" name="PSDB.Get-PSDBImportExportStatus" executed="True" result="Success" success="True" time="0.0812" asserts="0" description="PSDB.Get-PSDBImportExportStatus">
                 <results>
-                  <test-case description="Should be exactly same as result" name="PSDB.Get-PSDBImportExportStatus.Should be exactly same as result" time="0.0963" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should be exactly same as result" name="PSDB.Get-PSDBImportExportStatus.Should be exactly same as result" time="0.0188" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
         </results>
       </test-suite>
-      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Get-PSDBKVSecret.Tests.ps1" executed="True" result="Success" success="True" time="1.8485" asserts="0" description="C:\Projects\PSDB\Tests\Get-PSDBKVSecret.Tests.ps1">
+      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Get-PSDBKVSecret.Tests.ps1" executed="True" result="Success" success="True" time="1.8582" asserts="0" description="C:\Projects\PSDB\Tests\Get-PSDBKVSecret.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="1.6676" asserts="0" description="PSDB">
+          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="1.774" asserts="0" description="PSDB">
             <results>
-              <test-suite type="TestFixture" name="PSDB.Get-PSDBKVSecret" executed="True" result="Success" success="True" time="1.605" asserts="0" description="PSDB.Get-PSDBKVSecret">
+              <test-suite type="TestFixture" name="PSDB.Get-PSDBKVSecret" executed="True" result="Success" success="True" time="1.7178" asserts="0" description="PSDB.Get-PSDBKVSecret">
                 <results>
-                  <test-case description="Should return password as plain text" name="PSDB.Get-PSDBKVSecret.Should return password as plain text" time="0.0931" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should return password as secure string" name="PSDB.Get-PSDBKVSecret.Should return password as secure string" time="1.4561" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return password as plain text" name="PSDB.Get-PSDBKVSecret.Should return password as plain text" time="0.4628" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return password as secure string" name="PSDB.Get-PSDBKVSecret.Should return password as secure string" time="1.1466" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
         </results>
       </test-suite>
-      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Import-PSDBSqlDatabase.Tests.ps1" executed="True" result="Success" success="True" time="0.2768" asserts="0" description="C:\Projects\PSDB\Tests\Import-PSDBSqlDatabase.Tests.ps1">
+      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Import-PSDBSqlDatabase.Tests.ps1" executed="True" result="Success" success="True" time="0.2973" asserts="0" description="C:\Projects\PSDB\Tests\Import-PSDBSqlDatabase.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="0.1808" asserts="0" description="PSDB">
+          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="0.1916" asserts="0" description="PSDB">
             <results>
-              <test-suite type="TestFixture" name="PSDB.Import-PSDBSqlDatabase" executed="True" result="Success" success="True" time="0.0811" asserts="0" description="PSDB.Import-PSDBSqlDatabase">
+              <test-suite type="TestFixture" name="PSDB.Import-PSDBSqlDatabase" executed="True" result="Success" success="True" time="0.1174" asserts="0" description="PSDB.Import-PSDBSqlDatabase">
                 <results>
-                  <test-case description="Should return the status link after triggering the import operation" name="PSDB.Import-PSDBSqlDatabase.Should return the status link after triggering the import operation" time="0.0314" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return the status link after triggering the import operation" name="PSDB.Import-PSDBSqlDatabase.Should return the status link after triggering the import operation" time="0.0365" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
         </results>
       </test-suite>
-      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Invoke-PSDBDatabaseQuery.Tests.ps1" executed="True" result="Success" success="True" time="3.9015" asserts="0" description="C:\Projects\PSDB\Tests\Invoke-PSDBDatabaseQuery.Tests.ps1">
+      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Invoke-PSDBDatabaseQuery.Tests.ps1" executed="True" result="Success" success="True" time="10.721" asserts="0" description="C:\Projects\PSDB\Tests\Invoke-PSDBDatabaseQuery.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="3.8248" asserts="0" description="PSDB">
+          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="10.5815" asserts="0" description="PSDB">
             <results>
-              <test-suite type="TestFixture" name="PSDB.Invoke-PSDBDatabaseQuery" executed="True" result="Success" success="True" time="3.7098" asserts="0" description="PSDB.Invoke-PSDBDatabaseQuery">
+              <test-suite type="TestFixture" name="PSDB.Invoke-PSDBDatabaseQuery" executed="True" result="Success" success="True" time="10.5178" asserts="0" description="PSDB.Invoke-PSDBDatabaseQuery">
                 <results>
-                  <test-case description="Should create [test] user" name="PSDB.Invoke-PSDBDatabaseQuery.Should create [test] user" time="0.2286" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should return corresponding value" name="PSDB.Invoke-PSDBDatabaseQuery.Should return corresponding value" time="0.0227" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should drop [test] user" name="PSDB.Invoke-PSDBDatabaseQuery.Should drop [test] user" time="0.0187" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should not exists" name="PSDB.Invoke-PSDBDatabaseQuery.Should not exists" time="0.0282" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should create [test] user" name="PSDB.Invoke-PSDBDatabaseQuery.Should create [test] user" time="2.8977" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return corresponding value" name="PSDB.Invoke-PSDBDatabaseQuery.Should return corresponding value" time="2.396" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should drop [test] user" name="PSDB.Invoke-PSDBDatabaseQuery.Should drop [test] user" time="2.6534" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should not exists" name="PSDB.Invoke-PSDBDatabaseQuery.Should not exists" time="2.4437" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
         </results>
       </test-suite>
-      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\New-PSDBConnectionString.Tests.ps1" executed="True" result="Success" success="True" time="0.5556" asserts="0" description="C:\Projects\PSDB\Tests\New-PSDBConnectionString.Tests.ps1">
+      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\New-PSDBConnectionString.Tests.ps1" executed="True" result="Success" success="True" time="0.33" asserts="0" description="C:\Projects\PSDB\Tests\New-PSDBConnectionString.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="0.4842" asserts="0" description="PSDB">
+          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="0.2328" asserts="0" description="PSDB">
             <results>
-              <test-suite type="TestFixture" name="PSDB.New-PSDBConnectionString" executed="True" result="Success" success="True" time="0.4112" asserts="0" description="PSDB.New-PSDBConnectionString">
+              <test-suite type="TestFixture" name="PSDB.New-PSDBConnectionString" executed="True" result="Success" success="True" time="0.131" asserts="0" description="PSDB.New-PSDBConnectionString">
                 <results>
-                  <test-case description="Should return 'Standard' connection string" name="PSDB.New-PSDBConnectionString.Should return 'Standard' connection string" time="0.03" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should return 'MARS Enabled' connection string" name="PSDB.New-PSDBConnectionString.Should return 'MARS Enabled' connection string" time="0.0823" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should return 'AAD With Username and Password' connection string" name="PSDB.New-PSDBConnectionString.Should return 'AAD With Username and Password' connection string" time="0.0771" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should return 'Integrated Windows Authentication with AAD' connection string" name="PSDB.New-PSDBConnectionString.Should return 'Integrated Windows Authentication with AAD' connection string" time="0.0799" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should return 'Always Encrypted' connection string" name="PSDB.New-PSDBConnectionString.Should return 'Always Encrypted' connection string" time="0.0298" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should be exactly same as $connectionString" name="PSDB.New-PSDBConnectionString.Should be exactly same as $connectionString" time="0.0519" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return 'Standard' connection string" name="PSDB.New-PSDBConnectionString.Should return 'Standard' connection string" time="0.0135" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return 'MARS Enabled' connection string" name="PSDB.New-PSDBConnectionString.Should return 'MARS Enabled' connection string" time="0.0122" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return 'AAD With Username and Password' connection string" name="PSDB.New-PSDBConnectionString.Should return 'AAD With Username and Password' connection string" time="0.0117" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return 'Integrated Windows Authentication with AAD' connection string" name="PSDB.New-PSDBConnectionString.Should return 'Integrated Windows Authentication with AAD' connection string" time="0.015" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return 'Always Encrypted' connection string" name="PSDB.New-PSDBConnectionString.Should return 'Always Encrypted' connection string" time="0.0161" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should be exactly same as $connectionString" name="PSDB.New-PSDBConnectionString.Should be exactly same as $connectionString" time="0.0091" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
         </results>
       </test-suite>
-      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Set-PSDBDefault.Tests.ps1" executed="True" result="Success" success="True" time="4.3669" asserts="0" description="C:\Projects\PSDB\Tests\Set-PSDBDefault.Tests.ps1">
+      <test-suite type="TestFixture" name="C:\Projects\PSDB\Tests\Set-PSDBDefault.Tests.ps1" executed="True" result="Success" success="True" time="4.4809" asserts="0" description="C:\Projects\PSDB\Tests\Set-PSDBDefault.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="4.2197" asserts="0" description="PSDB">
+          <test-suite type="TestFixture" name="PSDB" executed="True" result="Success" success="True" time="4.3159" asserts="0" description="PSDB">
             <results>
-              <test-suite type="TestFixture" name="PSDB.Set-PSDBDefault" executed="True" result="Success" success="True" time="4.1391" asserts="0" description="PSDB.Set-PSDBDefault">
+              <test-suite type="TestFixture" name="PSDB.Set-PSDBDefault" executed="True" result="Success" success="True" time="4.2598" asserts="0" description="PSDB.Set-PSDBDefault">
                 <results>
-                  <test-case description="Should set the subscription in current context" name="PSDB.Set-PSDBDefault.Should set the subscription in current context" time="3.0397" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Should create environment variable" name="PSDB.Set-PSDBDefault.Should create environment variable" time="0.0177" asserts="0" success="True" result="Success" executed="True" />
-                  <test-case description="Environment variable should contain current context value" name="PSDB.Set-PSDBDefault.Environment variable should contain current context value" time="0.0201" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should set the subscription in current context" name="PSDB.Set-PSDBDefault.Should set the subscription in current context" time="1.9946" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should create environment variable" name="PSDB.Set-PSDBDefault.Should create environment variable" time="1.1372" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Environment variable should contain current context value" name="PSDB.Set-PSDBDefault.Environment variable should contain current context value" time="1.0855" asserts="0" success="True" result="Success" executed="True" />
                 </results>
               </test-suite>
             </results>
