@@ -16,7 +16,9 @@ function _getDefaultSubscription {
 }
 
 function _getDefaultSubscriptions {
-    return $env:PSDB_SUBSCRIPTIONS.Split(",")
+    if (-not ([string]::IsNullOrEmpty($env:PSDB_SUBSCRIPTIONS))) {
+        return $env:PSDB_SUBSCRIPTIONS.Split(",")
+    }
 }
 
 # Using this function only for tab completers.
@@ -29,10 +31,20 @@ function _getResources {
         [switch] $SqlDatabases
     )
 
+    if ([string]::IsNullOrEmpty($env:PSDB_SUBSCRIPTIONS)) {
+        $subscriptions = (Get-AzSubscription -WarningAction SilentlyContinue).Name
+    } else {
+        $subscriptions = _getDefaultSubscriptions
+    }
+
     if ($ResourceGroups) {
-        $rsgs = $env:PSDB_RESOURCEGROUPS -split ","
+        $rsgs = $env:PSDB_RESOURCEGROUPS #-split ","
+        $resources = @()
         if (-not $rsgs) {
-            $resources = Get-AzResource
+            $subscriptions | ForEach-Object {
+                Set-PSDBDefault -Subscription $_
+                $resources += Get-AzResource
+            }
             $resourceGroupNames = $resources.ResourceGroupName | Select-Object -Unique
 
             _setDefaultResource -ResourceName "ResourceGroups" -Resources $resourceGroupNames
@@ -40,14 +52,18 @@ function _getResources {
 
             return [PSDBResources]::ResourceGroups
         } else {
-            return $rsgs
+            return $env:PSDB_RESOURCEGROUPS.Split(",")
         }
     }
 
     if ($SqlServers) {
-        $sql = $env:PSDB_SQLSERVERS -split ","
+        $sql = $env:PSDB_SQLSERVERS #-split ","
+        $resources = @()
         if (-not $sql) {
-            $resources = Get-AzResource
+            $subscriptions | ForEach-Object {
+                Set-PSDBDefault -Subscription $_
+                $resources += Get-AzResource
+            }
             $servers = $resources | Where-Object {$_.ResourceId -like "*Microsoft.Sql*" -and $_.Name -notlike "*/*"} | Select-Object Name
 
             _setDefaultResource -ResourceName "SqlServers" -Resources $servers.Name
@@ -55,14 +71,18 @@ function _getResources {
 
             return [PSDBResources]::SqlServers
         } else {
-            return $sql
+            return $env:PSDB_SQLSERVERS.Split(",")
         }
     }
 
     if ($StorageAccounts) {
-        $storage = $env:PSDB_STORAGEACCOUNTS -split ","
+        $storage = $env:PSDB_STORAGEACCOUNTS #-split ","
+        $resources = @()
         if (-not $storage) {
-            $resources = Get-AzResource
+            $subscriptions | ForEach-Object {
+                Set-PSDBDefault -Subscription $_
+                $resources += Get-AzResource
+            }
             $accounts = $resources | Where-Object {$_.ResourceId -like "*Microsoft.Storage*"} | Select-Object Name
 
             _setDefaultResource -ResourceName "StorageAccounts" -Resources $accounts.Name
@@ -70,14 +90,18 @@ function _getResources {
 
             return [PSDBResources]::StorageAccounts
         } else {
-            return $storage
+            return $env:PSDB_STORAGEACCOUNTS.Split(",")
         }
     }
 
     if ($KeyVaults) {
-        $kvs = $env:PSDB_KEYVAULTS -split ","
+        $kvs = $env:PSDB_KEYVAULTS #-split ","
+        $resources = @()
         if (-not $kvs) {
-            $resources = Get-AzResource
+            $subscriptions | ForEach-Object {
+                Set-PSDBDefault -Subscription $_
+                $resources += Get-AzResource
+            }
             $kVaults = $resources | Where-Object {$_.ResourceId -like "*Microsoft.KeyVault*"} | Select-Object Name
 
             _setDefaultResource -ResourceName "KeyVaults" -Resources $kVaults.Name
@@ -85,14 +109,18 @@ function _getResources {
 
             return [PSDBResources]::KeyVaults
         } else {
-            return $kvs
+            return $env:PSDB_KEYVAULTS.Split(",")
         }
     }
 
     if ($SqlDatabases) {
-        $dbs = $env:PSDB_DATABASES -split ","
+        $dbs = $env:PSDB_DATABASES #-split ","
+        $resources = @()
         if (-not $dbs) {
-            $resources = Get-AzResource
+            $subscriptions | ForEach-Object {
+                Set-PSDBDefault -Subscription $_
+                $resources += Get-AzResource
+            }
             $databases = $resources | Where-Object {$_.ResourceType -eq "Microsoft.Sql/servers/databases"} | Select-Object Name
             $databases = $databases | Where-Object { $_.Name -notlike "*master*" }
 
@@ -151,7 +179,9 @@ function _clearDefaults {
     $env:PSDB_RESOURCEGROUPS = $null
     $env:PSDB_SQLSERVERS = $null
     $env:PSDB_STORAGEACCOUNTS = $null
-    $env:PSDB_KEYVAULTS = $null
+    $env:PSDB_DATABASES = $null
+    $env:PSDB_SUBSCRIPTION = $null
+    $env:PSDB_SUBSCRIPTIONS = $null
 }
 
 function _getLatestBacPacFile {
