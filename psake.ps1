@@ -1,13 +1,11 @@
 # Install dependencies
-# Get-AzResource wouldn't work in pipeline which fails the tests.
+# Az cmdlets wouldn't work in pipeline which fails the tests.
 # This has also be dealt by checking for the module.
-
-$AzModules = (Import-PowerShellDataFile -Path .\PSDB\PSDB.psd1)["RequiredModules"]
-$RequiredModules = @("psake", "Pester", "BuildHelpers", "PSScriptAnalyzer", "platyPS", $AzModules)
+$RequiredModules = @("psake", "Pester", "BuildHelpers", "PSScriptAnalyzer", "platyPS", "Az.Accounts", "Az.Sql", "Az.Resources", "Az.Storage", "Az.KeyVault")
 $RequiredModules | ForEach-Object {
     if (-not (Get-Module -ListAvailable $_)) {
         Write-Output "Installing module $($_)"
-        Install-Module -Name $_ -SkipPublisherCheck -Scope CurrentUser -Force -Repository PSGallery
+        Install-Module -Name $_ -SkipPublisherCheck -Scope CurrentUser -Force -Repository PSGallery -AllowClobber
     }
 }
 
