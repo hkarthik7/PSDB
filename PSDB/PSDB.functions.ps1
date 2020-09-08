@@ -225,9 +225,19 @@ function Export-PSDBSqlDatabase {
                     ResourceGroupName = $ResourceGroupName
                     AdministratorLogin = $AdministratorLogin
                     AdministratorLoginPassword = $AdministratorLoginPassword
+                    ErrorAction = "Stop"
                 }
-                $sqlExport = New-AzSqlDatabaseExport @splat
-                return $sqlExport.OperationStatusLink
+                try {
+                    $sqlExport = New-AzSqlDatabaseExport @splat
+                    return $sqlExport.OperationStatusLink
+                }
+                catch {
+                    if ($_.Exception.Message -match "Login failed") {
+                        $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                        $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                        Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                    }
+                }
                 #end region start DB export
             }
         }
@@ -522,9 +532,19 @@ function Import-PSDBSqlDatabase {
                     DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
                     AdministratorLogin = $AdministratorLogin
                     AdministratorLoginPassword = $AdministratorLoginPassword
+                    ErrorAction = "Stop"
                 }
-                $sqlImport = New-AzSqlDatabaseImport @splat
-                return $sqlImport.OperationStatusLink
+                try {
+                    $sqlImport = New-AzSqlDatabaseImport @splat
+                    return $sqlImport.OperationStatusLink
+                }
+                catch {
+                    if ($_.Exception.Message -match "Login failed") {
+                        $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                        $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                        Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                    }
+                }
             }
         }
         catch {
@@ -655,7 +675,6 @@ function Set-PSDBDefault {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "Low")]
     param (
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
-        [SubscriptionValidateAttribute()]
         [ArgumentCompleter([SubscriptionCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $Subscription,
