@@ -1,5 +1,4 @@
 # Install dependencies
-# Az cmdlets wouldn't work in pipeline which fails the tests.
 # This has also be dealt by checking for the module.
 $RequiredModules = @("psake", "Pester", "BuildHelpers", "PSScriptAnalyzer", "platyPS", "Az.Accounts", "Az.Sql", "Az.Resources", "Az.Storage", "Az.KeyVault")
 $RequiredModules | ForEach-Object {
