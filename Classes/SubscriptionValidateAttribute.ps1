@@ -13,7 +13,7 @@ class SubscriptionValidateAttribute : ValidateArgumentsAttribute {
       if ([string]::IsNullOrEmpty([PSDBResources]::Subscriptions)) {
         $subscriptions = (Get-AzSubscription -WarningAction SilentlyContinue).Name
       } else {
-        $subscriptions = ([PSDBResources]::ResourceGroups).Split(",")
+        $subscriptions = ([PSDBResources]::Subscriptions).Split(",")
       }
 
       $SubscriptionsIds = (Get-AzSubscription -WarningAction SilentlyContinue).Id
