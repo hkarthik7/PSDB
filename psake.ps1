@@ -1,5 +1,6 @@
 # Install dependencies
-$RequiredModules = @("psake", "Pester", "BuildHelpers", "PSScriptAnalyzer", "platyPS")
+$AzModules = Import-PowerShellDataFile -Path .\PSDB\PSDB.psd1
+$RequiredModules = @("psake", "Pester", "BuildHelpers", "PSScriptAnalyzer", "platyPS", $AzModules["RequiredModules"])
 $RequiredModules | ForEach-Object {
     if (-not (Get-Module -ListAvailable $_)) {
         Write-Output "Installing module $($_)"
