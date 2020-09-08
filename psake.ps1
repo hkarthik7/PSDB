@@ -8,4 +8,4 @@ $RequiredModules | ForEach-Object {
     }
 }
 
-Invoke-psake .\build.ps1 Clean, Build, Analyze, Test, updateMarkdownHelp, createExternalHelp
+Invoke-psake .\build.ps1 Clean, Build, Analyze, Test
