@@ -5,7 +5,7 @@ Describe "PSDB" {
         Import-Module .\PSDB\PSDB.psm1 -Force
     }
     Context "Get-PSDBDatabaseData" {
-        BeforeAll {
+        BeforeEach {
             $username = Get-PSDBKVSecret -VaultName (_getResources -KeyVaults)[0] -SecretName "SQLUSERNAME" -AsPlainText
             $password = Get-PSDBKVSecret -VaultName (_getResources -KeyVaults)[0] -SecretName "SQLPASSWORD"
             $creds = New-Object System.Management.Automation.PSCredential($username, $password)

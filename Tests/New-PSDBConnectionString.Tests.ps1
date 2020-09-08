@@ -5,7 +5,7 @@ Describe "PSDB" {
         Import-Module .\PSDB\PSDB.psm1 -Force
     }
     Context "New-PSDBConnectionString" {
-        BeforeAll {
+        BeforeEach {
             $SqlServerName = "sql-01"
             $DatabaseName = "sql-db-01"
             $Creds = New-Object System.Management.Automation.PSCredential("domain\username", ("myPassword" | ConvertTo-SecureString -AsPlainText -Force))

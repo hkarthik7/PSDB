@@ -7,7 +7,7 @@ Describe "PSDB" {
     Context "Get-PSDBKVSecret" {
         # Act and assert on defined dummy variables.
 
-        BeforeAll {
+        BeforeEach {
             $VaultName = "test-psdb-kv-01"
             $SecretName = "sqlpassword"
             $result = "Test@123"
@@ -22,7 +22,7 @@ Describe "PSDB" {
         }
 
         It "Should return password as secure string" {
-            Get-PSDBKVSecret -VaultName $VaultName -SecretName $SecretName | Should -BeOfType SecureString
+            Get-PSDBKVSecret -VaultName $VaultName -SecretName $SecretName | Should -BeOfType System.Security.SecureString
         }
     }
 }

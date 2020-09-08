@@ -5,7 +5,7 @@ Describe "PSDB" {
         Import-Module .\PSDB\PSDB.psm1 -Force
     }
     Context "Set-PSDBDefault" {
-        BeforeAll {
+        BeforeEach {
             $subscription = (Get-AzSubscription -WarningAction SilentlyContinue).Name[0]
         }
 
