@@ -15,7 +15,7 @@ Set-PSDBDefault sets the default parameters in current session or process.
 
 ```
 Set-PSDBDefault [-Subscription] <String> [[-ResourceGroupName] <String>] [-ServerName <String>]
- [-DatabaseName <String>] [-WhatIf] [-Confirm] [-Level <String>] [<CommonParameters>]
+ [-DatabaseName <String>] [-Level <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
