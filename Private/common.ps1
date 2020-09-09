@@ -16,9 +16,7 @@ function _getDefaultSubscription {
 }
 
 function _getDefaultSubscriptions {
-    if (-not ([string]::IsNullOrEmpty($env:PSDB_SUBSCRIPTIONS))) {
-        return $env:PSDB_SUBSCRIPTIONS.Split(",")
-    }
+    return ($env:PSDB_SUBSCRIPTIONS -split ",")
 }
 
 # Using this function only for tab completers.
@@ -31,101 +29,80 @@ function _getResources {
         [switch] $SqlDatabases
     )
 
-    if ([string]::IsNullOrEmpty($env:PSDB_SUBSCRIPTIONS)) {
-        $subscriptions = (Get-AzSubscription -WarningAction SilentlyContinue).Name
-    } else {
-        $subscriptions = _getDefaultSubscriptions
-    }
-
     if ($ResourceGroups) {
-        $rsgs = $env:PSDB_RESOURCEGROUPS #-split ","
-        $resources = @()
+        $rsgs = $env:PSDB_RESOURCEGROUPS -split ","
         if (-not $rsgs) {
-            $subscriptions | ForEach-Object {
-                Set-PSDBDefault -Subscription $_
-                $resources += Get-AzResource
-            }
+            $resources = Get-AzResource
             $resourceGroupNames = $resources.ResourceGroupName | Select-Object -Unique
 
             _setDefaultResource -ResourceName "ResourceGroups" -Resources $resourceGroupNames
-            [PSDBResources]::ResourceGroups = $env:PSDB_RESOURCEGROUPS.Split(",")
+            [PSDBResources]::ResourceGroups = $env:PSDB_RESOURCEGROUPS  -split ","
 
             return [PSDBResources]::ResourceGroups
         } else {
-            return $env:PSDB_RESOURCEGROUPS.Split(",")
+            return $rsgs
         }
     }
 
     if ($SqlServers) {
-        $sql = $env:PSDB_SQLSERVERS #-split ","
-        $resources = @()
+        $sql = $env:PSDB_SQLSERVERS -split ","
         if (-not $sql) {
-            $subscriptions | ForEach-Object {
-                Set-PSDBDefault -Subscription $_
-                $resources += Get-AzResource
-            }
+            $resources = Get-AzResource
             $servers = $resources | Where-Object {$_.ResourceId -like "*Microsoft.Sql*" -and $_.Name -notlike "*/*"} | Select-Object Name
 
             _setDefaultResource -ResourceName "SqlServers" -Resources $servers.Name
-            [PSDBResources]::SqlServers = $env:PSDB_SQLSERVERS.Split(",")
+            [PSDBResources]::SqlServers = $env:PSDB_SQLSERVERS -split ","
 
             return [PSDBResources]::SqlServers
         } else {
-            return $env:PSDB_SQLSERVERS.Split(",")
+            return $sql
         }
     }
 
     if ($StorageAccounts) {
-        $storage = $env:PSDB_STORAGEACCOUNTS #-split ","
-        $resources = @()
+        $storage = $env:PSDB_STORAGEACCOUNTS -split ","
         if (-not $storage) {
-            $subscriptions | ForEach-Object {
-                Set-PSDBDefault -Subscription $_
-                $resources += Get-AzResource
-            }
+            $resources = @()
+            $currentContext = (Get-AzContext).Subscription.Name
+            $subscriptions = if ([string]::IsNullOrEmpty($env:PSDB_SUBSCRIPTIONS)) { (Get-AzContext -ListAvailable).Subscription.Name } else { _getDefaultSubscriptions }
+            $subscriptions | ForEach-Object { Set-AzContext -Subscription $_ > $null; $resources += Get-AzResource }
+            Set-AzContext -Subscription $currentContext
+            # $resources = Get-AzResource
             $accounts = $resources | Where-Object {$_.ResourceId -like "*Microsoft.Storage*"} | Select-Object Name
 
             _setDefaultResource -ResourceName "StorageAccounts" -Resources $accounts.Name
-            [PSDBResources]::StorageAccounts = $env:PSDB_STORAGEACCOUNTS.Split(",")
+            [PSDBResources]::StorageAccounts = $env:PSDB_STORAGEACCOUNTS -split ","
 
             return [PSDBResources]::StorageAccounts
         } else {
-            return $env:PSDB_STORAGEACCOUNTS.Split(",")
+            return $storage
         }
     }
 
     if ($KeyVaults) {
-        $kvs = $env:PSDB_KEYVAULTS #-split ","
-        $resources = @()
+        $kvs = $env:PSDB_KEYVAULTS -split ","
         if (-not $kvs) {
-            $subscriptions | ForEach-Object {
-                Set-PSDBDefault -Subscription $_
-                $resources += Get-AzResource
-            }
+            $resources = Get-AzResource
             $kVaults = $resources | Where-Object {$_.ResourceId -like "*Microsoft.KeyVault*"} | Select-Object Name
 
             _setDefaultResource -ResourceName "KeyVaults" -Resources $kVaults.Name
-            [PSDBResources]::KeyVaults = $env:PSDB_KEYVAULTS.Split(",")
+            [PSDBResources]::KeyVaults = $env:PSDB_KEYVAULTS -split ","
 
             return [PSDBResources]::KeyVaults
         } else {
-            return $env:PSDB_KEYVAULTS.Split(",")
+            return $kvs
         }
     }
 
     if ($SqlDatabases) {
-        $dbs = $env:PSDB_DATABASES #-split ","
-        $resources = @()
+        $dbs = $env:PSDB_DATABASES -split ","
         if (-not $dbs) {
-            $subscriptions | ForEach-Object {
-                Set-PSDBDefault -Subscription $_
-                $resources += Get-AzResource
-            }
+            $resources = Get-AzResource
             $databases = $resources | Where-Object {$_.ResourceType -eq "Microsoft.Sql/servers/databases"} | Select-Object Name
             $databases = $databases | Where-Object { $_.Name -notlike "*master*" }
 
             _setDefaultResource -ResourceName "DATABASES" -Resources $databases.Name.Split("/")[1]
-            [PSDBResources]::SqlDatabases = $env:PSDB_DATABASES.Split(",")
+            [PSDBResources]::SqlDatabases = $env:PSDB_DATABASES -split ","
 
             return [PSDBResources]::SqlDatabases
         } else {
@@ -178,10 +155,10 @@ function _clearDefaults {
     $env:PSDB_RESOURCEGROUPNAME = $null
     $env:PSDB_RESOURCEGROUPS = $null
     $env:PSDB_SQLSERVERS = $null
-    $env:PSDB_STORAGEACCOUNTS = $null
+    # $env:PSDB_STORAGEACCOUNTS = $null
     $env:PSDB_DATABASES = $null
     $env:PSDB_SUBSCRIPTION = $null
-    $env:PSDB_SUBSCRIPTIONS = $null
+    # $env:PSDB_SUBSCRIPTIONS = $null
 }
 
 function _getLatestBacPacFile {
@@ -204,4 +181,25 @@ function _convertToPlainText {
 
     $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Password)
     return [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+}
+
+function _containerValidation {
+    param (
+        [string] $StorageAccountName,
+        [string] $StorageContainerName
+    )
+
+    $validated = $false
+    
+    #Container validation
+    try {
+        $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey (_getStorageAccountKey $StorageAccountName)
+        $container = Get-AzStorageContainer -Name $StorageContainerName -Context $Context -ErrorAction SilentlyContinue
+        if (-not ([string]::IsNullOrEmpty($container))) { $validated = $true } else { $validated = $false }
+    }
+    catch {
+        $validated = $false
+    }
+
+    return $validated   
 }
