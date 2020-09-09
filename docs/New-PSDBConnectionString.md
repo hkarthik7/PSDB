@@ -20,20 +20,20 @@ New-PSDBConnectionString -SqlServerName <String> -DatabaseName <String> -Authent
 
 ### AAD
 ```
-New-PSDBConnectionString -SqlServerName <String> -DatabaseName <String> -Credential <PSCredential>
- -Authentication <String> [<CommonParameters>]
+New-PSDBConnectionString -SqlServerName <String> -DatabaseName <String> -UserName <String> -Domain <String>
+ -Password <PSCredential> -Authentication <String> [<CommonParameters>]
 ```
 
 ### MARSEnabled
 ```
-New-PSDBConnectionString -SqlServerName <String> -DatabaseName <String> -Credential <PSCredential>
- [-MultipleActiveResultSets] [<CommonParameters>]
+New-PSDBConnectionString -SqlServerName <String> -DatabaseName <String> -UserName <String>
+ -Password <PSCredential> [-MultipleActiveResultSets] [<CommonParameters>]
 ```
 
 ### Standard
 ```
-New-PSDBConnectionString -SqlServerName <String> -DatabaseName <String> -Credential <PSCredential>
- [<CommonParameters>]
+New-PSDBConnectionString -SqlServerName <String> -DatabaseName <String> -UserName <String>
+ -Password <PSCredential> [<CommonParameters>]
 ```
 
 ### Encrypted
@@ -54,11 +54,11 @@ To view the list of available connection strings and what parameters to pass run
 ### Example 1
 ```powershell
 # Create standard connection string
-PS C:\> $Cred = Get-Credential
 PS C:\> New-PSDBConnectionString `
             -SqlServerName "sql-01" `
-            -DatabaseName "sql-db-01" `
-            -Credential $Cred
+            -DatabaseName "sql-db-01" 
+            -UserName "sqladmin" `
+            -Password ("SqlPassword" | ConvertTo-SecureString -AsPlainText -Force)
 
 This returns below connection string; 
 "Server=tcp:sql-01,1433;Database=sql-db-01;User ID=sqladmin@sql-01;Password=SqlPassword;Trusted_Connection=False;Encrypt=True;"
@@ -71,8 +71,10 @@ PS C:\> $Cred = New-Object System.Management.Automation.PSCredential("domain\sql
 PS C:\> New-PSDBConnectionString `
             -SqlServerName "sql-01" `
             -DatabaseName "sql-db-01" `
-            -Authentication 'Active Directory Password' `
-            -Credential $Cred
+            -Authentication 'Active Directory Password' 
+            -UserName "sqladmin" `
+            -Domain "domain"
+            -Password ("SqlPassword" | ConvertTo-SecureString -AsPlainText -Force)
 
 This returns below connection string; 
 "Server=tcp:sql-01,1433;Authentication=Active Directory Password;Database=sql-db-01;UID=sqladmin@domain;Password=SqlPassword;"
@@ -108,22 +110,6 @@ Parameter Sets: Encrypted
 Aliases:
 
 Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Credential
-Provide the username and Password. For Azure Active Directory with password connection string you need to pass the domain name with username like
-domain\username and the password.
-
-```yaml
-Type: PSCredential
-Parameter Sets: AAD, MARSEnabled, Standard
-Aliases:
-
-Required: True
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -211,6 +197,51 @@ Provide the SqlServerName.
 ```yaml
 Type: String
 Parameter Sets: AADIntegrated, AAD, MARSEnabled, Standard
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Domain
+Provide the domain name
+
+```yaml
+Type: String
+Parameter Sets: AAD
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Password
+Provide the database secure password
+
+```yaml
+Type: PSCredential
+Parameter Sets: AAD, MARSEnabled, Standard
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UserName
+Provide the username of database
+
+```yaml
+Type: String
+Parameter Sets: AAD, MARSEnabled, Standard
 Aliases:
 
 Required: True
