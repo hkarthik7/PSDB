@@ -12,7 +12,8 @@ Describe "PSDB" {
             $cs = New-PSDBConnectionString `
                     -SqlServerName "$((_getResources -SqlServers)).database.windows.net" `
                     -DatabaseName (_getResources -SqlDatabases) `
-                    -Credential $creds
+                    -UserName $username `
+                    -Password $password
             $q = "SELECT * FROM sys.sysusers"
             $invokeQuery = "CREATE user [test] with password='Welcome@1234'"
             $dropQuery = "DROP user [test]"

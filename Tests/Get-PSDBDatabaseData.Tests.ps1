@@ -12,7 +12,8 @@ Describe "PSDB" {
             $cs = New-PSDBConnectionString `
                     -SqlServerName "$((_getResources -SqlServers)).database.windows.net" `
                     -DatabaseName (_getResources -SqlDatabases) `
-                    -Credential $creds
+                    -UserName $username `
+                    -Password $password
             $q = "SELECT * FROM sys.sysusers"
             $result = @{
                 uid         = 16393
