@@ -1383,18 +1383,6 @@ PS C:\&gt; Import-PSDBSqlDatabase `
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>Credential</maml:name>
-          <maml:Description>
-            <maml:para>Provide the username and Password. For Azure Active Directory with password connection string you need to pass the domain name with username like domain\username and the password.</maml:para>
-          </maml:Description>
-          <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
-          <dev:type>
-            <maml:name>PSCredential</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>DatabaseName</maml:name>
           <maml:Description>
             <maml:para>Provide the DatabaseName.</maml:para>
@@ -1410,6 +1398,42 @@ PS C:\&gt; Import-PSDBSqlDatabase `
           <maml:name>SqlServerName</maml:name>
           <maml:Description>
             <maml:para>Provide the SqlServerName.</maml:para>
+          </maml:Description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Domain</maml:name>
+          <maml:Description>
+            <maml:para>Provide the domain name</maml:para>
+          </maml:Description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Password</maml:name>
+          <maml:Description>
+            <maml:para>Provide the database secure password</maml:para>
+          </maml:Description>
+          <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
+          <dev:type>
+            <maml:name>PSCredential</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UserName</maml:name>
+          <maml:Description>
+            <maml:para>Provide the username of database</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -1472,18 +1496,6 @@ PS C:\&gt; Import-PSDBSqlDatabase `
       <command:syntaxItem>
         <maml:name>New-PSDBConnectionString</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>Credential</maml:name>
-          <maml:Description>
-            <maml:para>Provide the username and Password. For Azure Active Directory with password connection string you need to pass the domain name with username like domain\username and the password.</maml:para>
-          </maml:Description>
-          <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
-          <dev:type>
-            <maml:name>PSCredential</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>DatabaseName</maml:name>
           <maml:Description>
             <maml:para>Provide the DatabaseName.</maml:para>
@@ -1518,13 +1530,10 @@ PS C:\&gt; Import-PSDBSqlDatabase `
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-      </command:syntaxItem>
-      <command:syntaxItem>
-        <maml:name>New-PSDBConnectionString</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>Credential</maml:name>
+          <maml:name>Password</maml:name>
           <maml:Description>
-            <maml:para>Provide the username and Password. For Azure Active Directory with password connection string you need to pass the domain name with username like domain\username and the password.</maml:para>
+            <maml:para>Provide the database secure password</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
           <dev:type>
@@ -1533,6 +1542,21 @@ PS C:\&gt; Import-PSDBSqlDatabase `
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UserName</maml:name>
+          <maml:Description>
+            <maml:para>Provide the username of database</maml:para>
+          </maml:Description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+      <command:syntaxItem>
+        <maml:name>New-PSDBConnectionString</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>DatabaseName</maml:name>
           <maml:Description>
@@ -1549,6 +1573,30 @@ PS C:\&gt; Import-PSDBSqlDatabase `
           <maml:name>SqlServerName</maml:name>
           <maml:Description>
             <maml:para>Provide the SqlServerName.</maml:para>
+          </maml:Description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Password</maml:name>
+          <maml:Description>
+            <maml:para>Provide the database secure password</maml:para>
+          </maml:Description>
+          <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
+          <dev:type>
+            <maml:name>PSCredential</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>UserName</maml:name>
+          <maml:Description>
+            <maml:para>Provide the username of database</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -1580,18 +1628,6 @@ PS C:\&gt; Import-PSDBSqlDatabase `
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
           <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>Credential</maml:name>
-        <maml:Description>
-          <maml:para>Provide the username and Password. For Azure Active Directory with password connection string you need to pass the domain name with username like domain\username and the password.</maml:para>
-        </maml:Description>
-        <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
-        <dev:type>
-          <maml:name>PSCredential</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -1668,6 +1704,42 @@ PS C:\&gt; Import-PSDBSqlDatabase `
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Domain</maml:name>
+        <maml:Description>
+          <maml:para>Provide the domain name</maml:para>
+        </maml:Description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Password</maml:name>
+        <maml:Description>
+          <maml:para>Provide the database secure password</maml:para>
+        </maml:Description>
+        <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
+        <dev:type>
+          <maml:name>PSCredential</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>UserName</maml:name>
+        <maml:Description>
+          <maml:para>Provide the username of database</maml:para>
+        </maml:Description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
     </command:parameters>
     <command:inputTypes>
       <command:inputType>
@@ -1698,11 +1770,11 @@ PS C:\&gt; Import-PSDBSqlDatabase `
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
         <dev:code># Create standard connection string
-PS C:\&gt; $Cred = Get-Credential
 PS C:\&gt; New-PSDBConnectionString `
             -SqlServerName "sql-01" `
-            -DatabaseName "sql-db-01" `
-            -Credential $Cred
+            -DatabaseName "sql-db-01" 
+            -UserName "sqladmin" `
+            -Password ("SqlPassword" | ConvertTo-SecureString -AsPlainText -Force)
 
 This returns below connection string; 
 "Server=tcp:sql-01,1433;Database=sql-db-01;User ID=sqladmin@sql-01;Password=SqlPassword;Trusted_Connection=False;Encrypt=True;"</dev:code>
@@ -1717,8 +1789,10 @@ PS C:\&gt; $Cred = New-Object System.Management.Automation.PSCredential("domain\
 PS C:\&gt; New-PSDBConnectionString `
             -SqlServerName "sql-01" `
             -DatabaseName "sql-db-01" `
-            -Authentication 'Active Directory Password' `
-            -Credential $Cred
+            -Authentication 'Active Directory Password' 
+            -UserName "sqladmin" `
+            -Domain "domain"
+            -Password ("SqlPassword" | ConvertTo-SecureString -AsPlainText -Force)
 
 This returns below connection string; 
 "Server=tcp:sql-01,1433;Authentication=Active Directory Password;Database=sql-db-01;UID=sqladmin@domain;Password=SqlPassword;"</dev:code>
