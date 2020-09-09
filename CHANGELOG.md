@@ -6,6 +6,7 @@ deprecated in future module release.
 - Added argument validators for `ResourceGroupName`, `StorageAccount`, `SqlServer`, `Subscription` and `Database.`
 - Function name change for `Set-PSDBDefault` and added argument completer for `Database`.
 - Added warning message suppression for KeyVault cmdlet.
+- Code refactor for `Set-PSDBDefault`, `Export-PSDBSqlDatabase`, `Import-PSDBSqlDatabase`
 
 # 0.1.15
 
