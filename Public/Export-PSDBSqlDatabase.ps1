@@ -54,79 +54,99 @@ function Export-PSDBSqlDatabase {
     process {
 
         try {
+            #region start DB export
 
-            try {
-                $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey (_getStorageAccountKey $StorageAccountName)
-                $Container = Get-AzStorageContainer -Name $StorageContainerName -Context $Context -ErrorAction SilentlyContinue
-            }
-            catch {
-                $Container = $null
+            if (-not $BlobName) {
+                $BlobName = _getBacpacName -DatabaseName $DatabaseName
             }
 
-            if ([string]::IsNullOrEmpty($Container)) {
-                $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
-                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase" 
-                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
-            }
+            if ($PSBoundParameters["Subscription"]) {
+                $context = (Get-AzContext).Subscription.Name
+                    
+                Set-PSDBDefault -Subscription $Subscription
 
-            else {
-                #region start DB export
-
-                if ($PSBoundParameters["Subscription"]) {
-                    $context = (Get-AzContext).Subscription.Name
-
-                    if ($context -ne $Subscription) {
-                        
-                        Set-PSDBDefault -Subscription $Subscription
-
-                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-
-                        Set-PSDBDefault -Subscription $context
-                    } else {
-                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                    }
-
-                } else {
+                if (_containerValidation -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName) {
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                }
 
-                if (-not $BlobName) {
-                    $BlobName = _getBacpacName -DatabaseName $DatabaseName
-                }
+                    Set-PSDBDefault -Subscription $context
 
-                $splat = @{
-                    DatabaseName = $DatabaseName
-                    ServerName = $ServerName
-                    StorageKeyType = $StorageKeyType
-                    StorageKey = $storageKey
-                    StorageUri = "$storageUri/$BlobName"
-                    ResourceGroupName = $ResourceGroupName
-                    AdministratorLogin = $AdministratorLogin
-                    AdministratorLoginPassword = $AdministratorLoginPassword
-                    ErrorAction = "Stop"
-                }
-
-                try {
-                    $sqlExport = New-AzSqlDatabaseExport @splat
-
-                    return $sqlExport.OperationStatusLink
-                }
-                catch {
-                    if ($_.Exception.Message -match "Login failed") {
-                        $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
-                        $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
-                        Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                    $splat = @{
+                        DatabaseName = $DatabaseName
+                        ServerName = $ServerName
+                        StorageKeyType = $StorageKeyType
+                        StorageKey = $storageKey
+                        StorageUri = "$storageUri/$BlobName"
+                        ResourceGroupName = $ResourceGroupName
+                        AdministratorLogin = $AdministratorLogin
+                        AdministratorLoginPassword = $AdministratorLoginPassword
+                        ErrorAction = "Stop"
                     }
-                }                
 
-                #end region start DB export
+                    try {
+                        $sqlExport = New-AzSqlDatabaseExport @splat
+                        return $sqlExport.OperationStatusLink
+                    }
+                    catch {
+                        if ($_.Exception.Message -match "Login failed") {
+                            $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                            $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                            Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                        }
+                        else {
+                            throw "An error occurred: $($_.Exception.Message)"
+                        }
+                    }  
+                } 
+                else {
+                    $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
+                    $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase" 
+                    Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                }  
             }
+            else {
+                if (_containerValidation -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName) {
+                    $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                    $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+
+                    $splat = @{
+                        DatabaseName = $DatabaseName
+                        ServerName = $ServerName
+                        StorageKeyType = $StorageKeyType
+                        StorageKey = $storageKey
+                        StorageUri = "$storageUri/$BlobName"
+                        ResourceGroupName = $ResourceGroupName
+                        AdministratorLogin = $AdministratorLogin
+                        AdministratorLoginPassword = $AdministratorLoginPassword
+                        ErrorAction = "Stop"
+                    }
+
+                    try {
+                        $sqlExport = New-AzSqlDatabaseExport @splat
+                        return $sqlExport.OperationStatusLink
+                    }
+                    catch {
+                        if ($_.Exception.Message -match "Login failed") {
+                            $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                            $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                            Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                        }
+                        else {
+                            throw "An error occurred: $($_.Exception.Message)"
+                        }
+                    }
+                } 
+                else {
+                    $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
+                    $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase" 
+                    Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                }
+            }              
+
+            #end region start DB export
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
+            throw "An error occurred: $($_.Exception.Message)"
         }
     }
 }

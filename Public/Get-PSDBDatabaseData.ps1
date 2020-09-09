@@ -38,7 +38,7 @@ function Get-PSDBDatabaseData {
             return $result
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
+            throw "An error occurred: $($_.Exception.Message)"
         }
         finally {
             # cleaning up

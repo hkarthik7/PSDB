@@ -20,9 +20,19 @@ function New-PSDBConnectionString {
 
         [Parameter(Mandatory = $true, ParameterSetName = "Standard")]
         [Parameter(Mandatory = $true, ParameterSetName = "MARSEnabled")]
-        [Parameter(Mandatory = $true, ParameterSetName = "AAD", HelpMessage = "Provide the username with domain name")]
+        [Parameter(Mandatory = $true, ParameterSetName = "AAD", HelpMessage = "Provide the username of database")]
         [ValidateNotNullOrEmpty()]
-        [pscredential] $Credential,
+        [string] $UserName,
+
+        [Parameter(Mandatory = $true, ParameterSetName = "AAD", HelpMessage = "Provide the domain name")]
+        [ValidateNotNullOrEmpty()]
+        [string] $Domain,
+
+        [Parameter(Mandatory = $true, ParameterSetName = "Standard")]
+        [Parameter(Mandatory = $true, ParameterSetName = "MARSEnabled")]
+        [Parameter(Mandatory = $true, ParameterSetName = "AAD", HelpMessage = "Provide the database secure password")]
+        [ValidateNotNullOrEmpty()]
+        [securestring] $Password,
         
         [Parameter(Mandatory = $true, ParameterSetName = "MARSEnabled")]
         [switch] $MultipleActiveResultSets,
@@ -56,18 +66,14 @@ function New-PSDBConnectionString {
             [PSDBConnectionString] $ConnectionString = [PSDBConnectionString]::new()
             $CS = $null
 
-            if ($PSCmdlet.ParameterSetName -eq "Standard") {
-                $UserId = $Credential.GetNetworkCredential().UserName                
-                $Password = $Credential.GetNetworkCredential().Password
-
-                $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $UserId, $Password)
+            if ($PSCmdlet.ParameterSetName -eq "Standard") {             
+                $pswd = _convertToPlainText -Password $Password
+                $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $UserName, $pswd)
             }
 
             elseif ($PSCmdlet.ParameterSetName -eq "MARSEnabled") {
-                $UserId = $Credential.GetNetworkCredential().UserName                
-                $Password = $Credential.GetNetworkCredential().Password
-
-                $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $UserId, $Password, $MultipleActiveResultSets.IsPresent)
+                $pswd = _convertToPlainText -Password $Password
+                $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $UserName, $pswd, $MultipleActiveResultSets.IsPresent)
             }
 
             elseif ($PSCmdlet.ParameterSetName -eq "AADIntegrated") {
@@ -75,20 +81,8 @@ function New-PSDBConnectionString {
             }
 
             elseif ($PSCmdlet.ParameterSetName -eq "AAD") {
-
-                if ([string]::IsNullOrWhiteSpace($Credential.GetNetworkCredential().Domain)) {
-
-                    $Message = "Provide the domain name with username in format 'domain\username' to form the connection string."
-                    $ErrorId = "ObjectNotSpecified,PSDBConnectionString\New-PSDBConnectionString" 
-                    Write-Error -Exception ArgumentException -Message $Message -Category NotSpecified -ErrorId $ErrorId
-
-                } else {
-                    $UserId = $Credential.GetNetworkCredential().UserName
-                    $Domain = $Credential.GetNetworkCredential().Domain
-                    $Password = $Credential.GetNetworkCredential().Password
-
-                    $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $Authentication, $UserId, $Password, $Domain)
-                }
+                $pswd = _convertToPlainText -Password $Password
+                $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $Authentication, $UserName, $pswd, $Domain)
             }
 
             elseif ($PSCmdlet.ParameterSetName -eq "Encrypted") {
@@ -98,7 +92,7 @@ function New-PSDBConnectionString {
             return $CS
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
+            throw "An error occurred: $($_.Exception.Message)"
         }        
     }
 }

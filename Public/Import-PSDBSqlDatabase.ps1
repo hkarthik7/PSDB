@@ -3,6 +3,7 @@ function Import-PSDBSqlDatabase {
     [Alias("Import")]
     param (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [ResourceGroupValidateAttribute()]
         [ArgumentCompleter([ResourceGroupCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $ResourceGroupName,
@@ -57,107 +58,146 @@ function Import-PSDBSqlDatabase {
     process {
         try {
 
-            try {
-                $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey (_getStorageAccountKey $StorageAccountName)
-                $Container = Get-AzStorageContainer -Name $StorageContainerName -Context $Context -ErrorAction SilentlyContinue
-            }
-            catch {
-                $Container = $null
+            if (-not $Edition) {
+                $Edition = "Standard"
             }
 
-            if ([string]::IsNullOrEmpty($Container)) {
-                $Message = "Cannot validate the argument StorageContainerName. '$($StorageContainerName)' is not a valid storage container name. Pass the correct value and try again."
-                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase" 
-                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            if (-not $DatabaseMaxSizeBytes) {
+                $DatabaseMaxSizeBytes = "5000000"
             }
 
-            else {
-                #region start DB import
+            if (-not $ServiceObjectiveName) {
+                $ServiceObjectiveName = "S0"
+            }
 
-                if ($PSBoundParameters["Subscription"]) {
-                    $context = (Get-AzContext).Subscription.Name
+            #region start DB import
 
-                    if ($context -ne $Subscription) {
-                        
-                        Set-PSDBDefault -Subscription $Subscription
+            if ($PSBoundParameters["Subscription"]) {
+                $context = (Get-AzContext).Subscription.Name
 
-                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                    
+                Set-PSDBDefault -Subscription $Subscription
 
-                        # Placing this check here because when I'm retrieving the information for different subscription it has to
-                        # fetch the correct latest bacpac file. If this is out of this check then the context will be different and
-                        # I'm receiving error.
-                        if (-not $BacpacName) {
-                            $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                        }
+                if (_containerValidation -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName) {
 
-                        Set-PSDBDefault -Subscription $context
+                    $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                    $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
 
-                    } else {
-                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-
-                        if (-not $BacpacName) {
-                            $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                        }
+                    # Placing this check here because when I'm retrieving the information for different subscription it has to
+                    # fetch the correct latest bacpac file. If this is out of this check then the context will be different and
+                    # I'm receiving error.
+                    if (-not $BacpacName) {
+                        $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
                     }
 
-                } else {
+                    if (-not $ImportDatabaseAs) {
+                        $ImportDatabaseAs = $BacpacName.Replace(".bacpac", "")
+                    }
+
+                    Set-PSDBDefault -Subscription $context
+
+                    $splat = @{
+                        DatabaseName = $ImportDatabaseAs
+                        ResourceGroupName = $ResourceGroupName
+                        ServerName = $ServerName
+                        StorageKeyType = "StorageAccessKey"
+                        StorageKey = $storageKey
+                        StorageUri = "$storageUri/$BacpacName"
+                        Edition = $Edition
+                        ServiceObjectiveName = $ServiceObjectiveName
+                        DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
+                        AdministratorLogin = $AdministratorLogin
+                        AdministratorLoginPassword = $AdministratorLoginPassword
+                        ErrorAction = "Stop"
+                    }
+        
+                    try {
+                        $sqlImport = New-AzSqlDatabaseImport @splat
+                        return $sqlImport.OperationStatusLink
+                    }
+                    catch {
+                        if ($_.Exception.Message -match "Login failed") {
+                            $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                            $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                            Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                        }
+                        else {
+                            throw "An error occurred: $($_.Exception.Message)"
+                        }
+                    }
+                }
+                else {
+                    $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
+                    $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase" 
+                    Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                }
+            } 
+            else {
+                if (_containerValidation -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName) {
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
 
                     if (-not $BacpacName) {
                         $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
                     }
-                }
 
-                if (-not $Edition) {
-                    $Edition = "Standard"
-                }
-
-                if (-not $DatabaseMaxSizeBytes) {
-                    $DatabaseMaxSizeBytes = "5000000"
-                }
-
-                if (-not $ServiceObjectiveName) {
-                    $ServiceObjectiveName = "S0"
-                }
-
-                if (-not $ImportDatabaseAs) {
-                    $ImportDatabaseAs = $BacpacName.Replace(".bacpac", "")
-                }
-
-                $splat = @{
-                    DatabaseName = $ImportDatabaseAs
-                    ResourceGroupName = $ResourceGroupName
-                    ServerName = $ServerName
-                    StorageKeyType = "StorageAccessKey"
-                    StorageKey = $storageKey
-                    StorageUri = "$storageUri/$BacpacName"
-                    Edition = $Edition
-                    ServiceObjectiveName = $ServiceObjectiveName
-                    DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
-                    AdministratorLogin = $AdministratorLogin
-                    AdministratorLoginPassword = $AdministratorLoginPassword
-                    ErrorAction = "Stop"
-                }
-
-                try {
-                    $sqlImport = New-AzSqlDatabaseImport @splat
-                    return $sqlImport.OperationStatusLink
-                }
-                catch {
-                    if ($_.Exception.Message -match "Login failed") {
-                        $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
-                        $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
-                        Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                    if (-not $ImportDatabaseAs) {
+                        $ImportDatabaseAs = $BacpacName.Replace(".bacpac", "")
                     }
-                }              
+
+                    $splat = @{
+                        DatabaseName = $ImportDatabaseAs
+                        ResourceGroupName = $ResourceGroupName
+                        ServerName = $ServerName
+                        StorageKeyType = "StorageAccessKey"
+                        StorageKey = $storageKey
+                        StorageUri = "$storageUri/$BacpacName"
+                        Edition = $Edition
+                        ServiceObjectiveName = $ServiceObjectiveName
+                        DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
+                        AdministratorLogin = $AdministratorLogin
+                        AdministratorLoginPassword = $AdministratorLoginPassword
+                        ErrorAction = "Stop"
+                    }
+        
+                    try {
+                        $sqlImport = New-AzSqlDatabaseImport @splat
+                        return $sqlImport.OperationStatusLink
+                    }
+                    catch {
+                        if ($_.Exception.Message -match "Login failed") {
+                            $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                            $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                            Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                        }
+                        else {
+                            throw "An error occurred: $($_.Exception.Message)"
+                        }
+                    }
+                }
+                else {
+                    $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
+                    $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase" 
+                    Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                }
             }
+
+            #endregion start DB import
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
+            if ($_.Exception.Message -match "The variable cannot be validated") {
+                $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not found in storage account '$($StorageAccountName)'. Pass the valid storage container name and try again."
+                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase" 
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
+            elseif ($_.Exception.Message -match "Target database is not empty") {
+                $Message = "Database with name '$($ImportDatabaseAs)' already exists in '$($ServerName)'. Pass different name and try again."
+                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase" 
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
+            else {
+                throw "An error occurred: $($_.Exception.Message)"
+            }
         }
     }
 }
-

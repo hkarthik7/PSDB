@@ -15,7 +15,7 @@ function Get-PSDBImportExportStatus {
 
     process {
         try {
-            $Status = Get-AzSqlDatabaseImportExportStatus -OperationStatusLink $StatusLink
+            $Status = Get-AzSqlDatabaseImportExportStatus -OperationStatusLink $StatusLink -ErrorAction Stop
 
             if ($Wait.IsPresent) {
 
@@ -43,7 +43,21 @@ function Get-PSDBImportExportStatus {
             }
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
+            if ($_.Exception.Message -match "Invalid URI") {
+                $Message = "Cannot validate argument '$($StatusLink)' on parameter StatusLink. Invalid URI. Pass the correct URI and try again."
+                $ErrorId = "InvalidArgument,PSDBImportExportStatus\Export-PSDBImportExportStatus"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
+            elseif ($_.Exception.Message -match "An error occurred while sending the request") {
+                $Message = "Cannot validate argument '$($StatusLink)' on parameter StatusLink. Invalid URI. Pass the correct URI and try again."
+                $ErrorId = "InvalidArgument,PSDBImportExportStatus\Export-PSDBImportExportStatus"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
+            else {
+                $Message = "$($_.Exception.Message)."
+                $ErrorId = "InvalidArgument,PSDBImportExportStatus\Export-PSDBImportExportStatus"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
         }
         finally {
             if ($stopWatch.IsRunning) {
