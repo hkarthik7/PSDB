@@ -10,7 +10,7 @@ View the introduction and module usage [here](https://hkarthik7.github.io/powers
 
 ## Getting Started
 
-You can directly install the module from [PowerShell gallery](https://www.powershellgallery.com/packages/PSDB/0.1.14).
+You can directly install the module from [PowerShell gallery](https://www.powershellgallery.com/packages/PSDB/0.1.16).
 
 ## Release Notes
 
