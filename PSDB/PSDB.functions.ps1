@@ -12,9 +12,7 @@ function _getDefaultSubscription {
     return $env:PSDB_SUBSCRIPTION
 }
 function _getDefaultSubscriptions {
-    if (-not ([string]::IsNullOrEmpty($env:PSDB_SUBSCRIPTIONS))) {
-        return $env:PSDB_SUBSCRIPTIONS.Split(",")
-    }
+    return ($env:PSDB_SUBSCRIPTIONS -split ",")
 }
 # Using this function only for tab completers.
 function _getResources {
@@ -25,87 +23,67 @@ function _getResources {
         [switch] $KeyVaults,
         [switch] $SqlDatabases
     )
-    if ([string]::IsNullOrEmpty($env:PSDB_SUBSCRIPTIONS)) {
-        $subscriptions = (Get-AzSubscription -WarningAction SilentlyContinue).Name
-    } else {
-        $subscriptions = _getDefaultSubscriptions
-    }
     if ($ResourceGroups) {
-        $rsgs = $env:PSDB_RESOURCEGROUPS #-split ","
-        $resources = @()
+        $rsgs = $env:PSDB_RESOURCEGROUPS -split ","
         if (-not $rsgs) {
-            $subscriptions | ForEach-Object {
-                Set-PSDBDefault -Subscription $_
-                $resources += Get-AzResource
-            }
+            $resources = Get-AzResource
             $resourceGroupNames = $resources.ResourceGroupName | Select-Object -Unique
             _setDefaultResource -ResourceName "ResourceGroups" -Resources $resourceGroupNames
-            [PSDBResources]::ResourceGroups = $env:PSDB_RESOURCEGROUPS.Split(",")
+            [PSDBResources]::ResourceGroups = $env:PSDB_RESOURCEGROUPS  -split ","
             return [PSDBResources]::ResourceGroups
         } else {
-            return $env:PSDB_RESOURCEGROUPS.Split(",")
+            return $rsgs
         }
     }
     if ($SqlServers) {
-        $sql = $env:PSDB_SQLSERVERS #-split ","
-        $resources = @()
+        $sql = $env:PSDB_SQLSERVERS -split ","
         if (-not $sql) {
-            $subscriptions | ForEach-Object {
-                Set-PSDBDefault -Subscription $_
-                $resources += Get-AzResource
-            }
+            $resources = Get-AzResource
             $servers = $resources | Where-Object {$_.ResourceId -like "*Microsoft.Sql*" -and $_.Name -notlike "*/*"} | Select-Object Name
             _setDefaultResource -ResourceName "SqlServers" -Resources $servers.Name
-            [PSDBResources]::SqlServers = $env:PSDB_SQLSERVERS.Split(",")
+            [PSDBResources]::SqlServers = $env:PSDB_SQLSERVERS -split ","
             return [PSDBResources]::SqlServers
         } else {
-            return $env:PSDB_SQLSERVERS.Split(",")
+            return $sql
         }
     }
     if ($StorageAccounts) {
-        $storage = $env:PSDB_STORAGEACCOUNTS #-split ","
-        $resources = @()
+        $storage = $env:PSDB_STORAGEACCOUNTS -split ","
         if (-not $storage) {
-            $subscriptions | ForEach-Object {
-                Set-PSDBDefault -Subscription $_
-                $resources += Get-AzResource
-            }
+            $resources = @()
+            $currentContext = (Get-AzContext).Subscription.Name
+            $subscriptions = if ([string]::IsNullOrEmpty($env:PSDB_SUBSCRIPTIONS)) { (Get-AzContext -ListAvailable).Subscription.Name } else { _getDefaultSubscriptions }
+            $subscriptions | ForEach-Object { Set-AzContext -Subscription $_ > $null; $resources += Get-AzResource }
+            Set-AzContext -Subscription $currentContext
+            # $resources = Get-AzResource
             $accounts = $resources | Where-Object {$_.ResourceId -like "*Microsoft.Storage*"} | Select-Object Name
             _setDefaultResource -ResourceName "StorageAccounts" -Resources $accounts.Name
-            [PSDBResources]::StorageAccounts = $env:PSDB_STORAGEACCOUNTS.Split(",")
+            [PSDBResources]::StorageAccounts = $env:PSDB_STORAGEACCOUNTS -split ","
             return [PSDBResources]::StorageAccounts
         } else {
-            return $env:PSDB_STORAGEACCOUNTS.Split(",")
+            return $storage
         }
     }
     if ($KeyVaults) {
-        $kvs = $env:PSDB_KEYVAULTS #-split ","
-        $resources = @()
+        $kvs = $env:PSDB_KEYVAULTS -split ","
         if (-not $kvs) {
-            $subscriptions | ForEach-Object {
-                Set-PSDBDefault -Subscription $_
-                $resources += Get-AzResource
-            }
+            $resources = Get-AzResource
             $kVaults = $resources | Where-Object {$_.ResourceId -like "*Microsoft.KeyVault*"} | Select-Object Name
             _setDefaultResource -ResourceName "KeyVaults" -Resources $kVaults.Name
-            [PSDBResources]::KeyVaults = $env:PSDB_KEYVAULTS.Split(",")
+            [PSDBResources]::KeyVaults = $env:PSDB_KEYVAULTS -split ","
             return [PSDBResources]::KeyVaults
         } else {
-            return $env:PSDB_KEYVAULTS.Split(",")
+            return $kvs
         }
     }
     if ($SqlDatabases) {
-        $dbs = $env:PSDB_DATABASES #-split ","
-        $resources = @()
+        $dbs = $env:PSDB_DATABASES -split ","
         if (-not $dbs) {
-            $subscriptions | ForEach-Object {
-                Set-PSDBDefault -Subscription $_
-                $resources += Get-AzResource
-            }
+            $resources = Get-AzResource
             $databases = $resources | Where-Object {$_.ResourceType -eq "Microsoft.Sql/servers/databases"} | Select-Object Name
             $databases = $databases | Where-Object { $_.Name -notlike "*master*" }
             _setDefaultResource -ResourceName "DATABASES" -Resources $databases.Name.Split("/")[1]
-            [PSDBResources]::SqlDatabases = $env:PSDB_DATABASES.Split(",")
+            [PSDBResources]::SqlDatabases = $env:PSDB_DATABASES -split ","
             return [PSDBResources]::SqlDatabases
         } else {
             return $dbs
@@ -146,10 +124,10 @@ function _clearDefaults {
     $env:PSDB_RESOURCEGROUPNAME = $null
     $env:PSDB_RESOURCEGROUPS = $null
     $env:PSDB_SQLSERVERS = $null
-    $env:PSDB_STORAGEACCOUNTS = $null
+    # $env:PSDB_STORAGEACCOUNTS = $null
     $env:PSDB_DATABASES = $null
     $env:PSDB_SUBSCRIPTION = $null
-    $env:PSDB_SUBSCRIPTIONS = $null
+    # $env:PSDB_SUBSCRIPTIONS = $null
 }
 function _getLatestBacPacFile {
     param (
@@ -167,6 +145,23 @@ function _convertToPlainText {
     )
     $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Password)
     return [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+}
+function _containerValidation {
+    param (
+        [string] $StorageAccountName,
+        [string] $StorageContainerName
+    )
+    $validated = $false
+    #Container validation
+    try {
+        $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey (_getStorageAccountKey $StorageAccountName)
+        $container = Get-AzStorageContainer -Name $StorageContainerName -Context $Context -ErrorAction SilentlyContinue
+        if (-not ([string]::IsNullOrEmpty($container))) { $validated = $true } else { $validated = $false }
+    }
+    catch {
+        $validated = $false
+    }
+    return $validated
 }
 function Export-PSDBSqlDatabase {
     [CmdletBinding()]
@@ -213,65 +208,89 @@ function Export-PSDBSqlDatabase {
     )
     process {
         try {
-            try {
-                $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey (_getStorageAccountKey $StorageAccountName)
-                $Container = Get-AzStorageContainer -Name $StorageContainerName -Context $Context -ErrorAction SilentlyContinue
+            #region start DB export
+            if (-not $BlobName) {
+                $BlobName = _getBacpacName -DatabaseName $DatabaseName
             }
-            catch {
-                $Container = $null
-            }
-            if ([string]::IsNullOrEmpty($Container)) {
-                $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
-                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
-                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
-            }
-            else {
-                #region start DB export
-                if ($PSBoundParameters["Subscription"]) {
-                    $context = (Get-AzContext).Subscription.Name
-                    if ($context -ne $Subscription) {
-                        Set-PSDBDefault -Subscription $Subscription
-                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                        Set-PSDBDefault -Subscription $context
-                    } else {
-                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                    }
-                } else {
+            if ($PSBoundParameters["Subscription"]) {
+                $context = (Get-AzContext).Subscription.Name
+                Set-PSDBDefault -Subscription $Subscription
+                if (_containerValidation -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName) {
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                }
-                if (-not $BlobName) {
-                    $BlobName = _getBacpacName -DatabaseName $DatabaseName
-                }
-                $splat = @{
-                    DatabaseName = $DatabaseName
-                    ServerName = $ServerName
-                    StorageKeyType = $StorageKeyType
-                    StorageKey = $storageKey
-                    StorageUri = "$storageUri/$BlobName"
-                    ResourceGroupName = $ResourceGroupName
-                    AdministratorLogin = $AdministratorLogin
-                    AdministratorLoginPassword = $AdministratorLoginPassword
-                    ErrorAction = "Stop"
-                }
-                try {
-                    $sqlExport = New-AzSqlDatabaseExport @splat
-                    return $sqlExport.OperationStatusLink
-                }
-                catch {
-                    if ($_.Exception.Message -match "Login failed") {
-                        $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
-                        $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
-                        Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                    Set-PSDBDefault -Subscription $context
+                    $splat = @{
+                        DatabaseName = $DatabaseName
+                        ServerName = $ServerName
+                        StorageKeyType = $StorageKeyType
+                        StorageKey = $storageKey
+                        StorageUri = "$storageUri/$BlobName"
+                        ResourceGroupName = $ResourceGroupName
+                        AdministratorLogin = $AdministratorLogin
+                        AdministratorLoginPassword = $AdministratorLoginPassword
+                        ErrorAction = "Stop"
+                    }
+                    try {
+                        $sqlExport = New-AzSqlDatabaseExport @splat
+                        return $sqlExport.OperationStatusLink
+                    }
+                    catch {
+                        if ($_.Exception.Message -match "Login failed") {
+                            $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                            $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                            Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                        }
+                        else {
+                            throw "An error occurred: $($_.Exception.Message)"
+                        }
                     }
                 }
-                #end region start DB export
+                else {
+                    $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
+                    $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                    Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                }
             }
+            else {
+                if (_containerValidation -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName) {
+                    $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                    $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                    $splat = @{
+                        DatabaseName = $DatabaseName
+                        ServerName = $ServerName
+                        StorageKeyType = $StorageKeyType
+                        StorageKey = $storageKey
+                        StorageUri = "$storageUri/$BlobName"
+                        ResourceGroupName = $ResourceGroupName
+                        AdministratorLogin = $AdministratorLogin
+                        AdministratorLoginPassword = $AdministratorLoginPassword
+                        ErrorAction = "Stop"
+                    }
+                    try {
+                        $sqlExport = New-AzSqlDatabaseExport @splat
+                        return $sqlExport.OperationStatusLink
+                    }
+                    catch {
+                        if ($_.Exception.Message -match "Login failed") {
+                            $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                            $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                            Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                        }
+                        else {
+                            throw "An error occurred: $($_.Exception.Message)"
+                        }
+                    }
+                }
+                else {
+                    $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
+                    $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                    Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                }
+            }
+            #end region start DB export
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
+            throw "An error occurred: $($_.Exception.Message)"
         }
     }
 }
@@ -321,7 +340,7 @@ function Get-PSDBDatabaseData {
             return $result
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
+            throw "An error occurred: $($_.Exception.Message)"
         }
         finally {
             # cleaning up
@@ -342,7 +361,7 @@ function Get-PSDBImportExportStatus {
     )
     process {
         try {
-            $Status = Get-AzSqlDatabaseImportExportStatus -OperationStatusLink $StatusLink
+            $Status = Get-AzSqlDatabaseImportExportStatus -OperationStatusLink $StatusLink -ErrorAction Stop
             if ($Wait.IsPresent) {
                 $timeSpan = New-TimeSpan -Seconds $TimeOut
                 $stopWatch = [System.Diagnostics.Stopwatch]::StartNew()
@@ -363,7 +382,21 @@ function Get-PSDBImportExportStatus {
             }
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
+            if ($_.Exception.Message -match "Invalid URI") {
+                $Message = "Cannot validate argument '$($StatusLink)' on parameter StatusLink. Invalid URI. Pass the correct URI and try again."
+                $ErrorId = "InvalidArgument,PSDBImportExportStatus\Export-PSDBImportExportStatus"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
+            elseif ($_.Exception.Message -match "An error occurred while sending the request") {
+                $Message = "Cannot validate argument '$($StatusLink)' on parameter StatusLink. Invalid URI. Pass the correct URI and try again."
+                $ErrorId = "InvalidArgument,PSDBImportExportStatus\Export-PSDBImportExportStatus"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
+            else {
+                $Message = "$($_.Exception.Message)."
+                $ErrorId = "InvalidArgument,PSDBImportExportStatus\Export-PSDBImportExportStatus"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
         }
         finally {
             if ($stopWatch.IsRunning) {
@@ -456,6 +489,7 @@ function Import-PSDBSqlDatabase {
     [Alias("Import")]
     param (
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [ResourceGroupValidateAttribute()]
         [ArgumentCompleter([ResourceGroupCompleter])]
         [ValidateNotNullOrEmpty()]
         [string] $ResourceGroupName,
@@ -496,88 +530,128 @@ function Import-PSDBSqlDatabase {
     )
     process {
         try {
-            try {
-                $Context = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey (_getStorageAccountKey $StorageAccountName)
-                $Container = Get-AzStorageContainer -Name $StorageContainerName -Context $Context -ErrorAction SilentlyContinue
+            if (-not $Edition) {
+                $Edition = "Standard"
             }
-            catch {
-                $Container = $null
+            if (-not $DatabaseMaxSizeBytes) {
+                $DatabaseMaxSizeBytes = "5000000"
             }
-            if ([string]::IsNullOrEmpty($Container)) {
-                $Message = "Cannot validate the argument StorageContainerName. '$($StorageContainerName)' is not a valid storage container name. Pass the correct value and try again."
-                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
-                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            if (-not $ServiceObjectiveName) {
+                $ServiceObjectiveName = "S0"
             }
-            else {
-                #region start DB import
-                if ($PSBoundParameters["Subscription"]) {
-                    $context = (Get-AzContext).Subscription.Name
-                    if ($context -ne $Subscription) {
-                        Set-PSDBDefault -Subscription $Subscription
-                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                        # Placing this check here because when I'm retrieving the information for different subscription it has to
-                        # fetch the correct latest bacpac file. If this is out of this check then the context will be different and
-                        # I'm receiving error.
-                        if (-not $BacpacName) {
-                            $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+            #region start DB import
+            if ($PSBoundParameters["Subscription"]) {
+                $context = (Get-AzContext).Subscription.Name
+                Set-PSDBDefault -Subscription $Subscription
+                if (_containerValidation -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName) {
+                    $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
+                    $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                    # Placing this check here because when I'm retrieving the information for different subscription it has to
+                    # fetch the correct latest bacpac file. If this is out of this check then the context will be different and
+                    # I'm receiving error.
+                    if (-not $BacpacName) {
+                        $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                    }
+                    if (-not $ImportDatabaseAs) {
+                        $ImportDatabaseAs = $BacpacName.Replace(".bacpac", "")
+                    }
+                    Set-PSDBDefault -Subscription $context
+                    $splat = @{
+                        DatabaseName = $ImportDatabaseAs
+                        ResourceGroupName = $ResourceGroupName
+                        ServerName = $ServerName
+                        StorageKeyType = "StorageAccessKey"
+                        StorageKey = $storageKey
+                        StorageUri = "$storageUri/$BacpacName"
+                        Edition = $Edition
+                        ServiceObjectiveName = $ServiceObjectiveName
+                        DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
+                        AdministratorLogin = $AdministratorLogin
+                        AdministratorLoginPassword = $AdministratorLoginPassword
+                        ErrorAction = "Stop"
+                    }
+                    try {
+                        $sqlImport = New-AzSqlDatabaseImport @splat
+                        return $sqlImport.OperationStatusLink
+                    }
+                    catch {
+                        if ($_.Exception.Message -match "Login failed") {
+                            $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                            $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                            Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
                         }
-                        Set-PSDBDefault -Subscription $context
-                    } else {
-                        $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
-                        $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
-                        if (-not $BacpacName) {
-                            $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
+                        else {
+                            throw "An error occurred: $($_.Exception.Message)"
                         }
                     }
-                } else {
+                }
+                else {
+                    $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
+                    $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                    Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                }
+            }
+            else {
+                if (_containerValidation -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName) {
                     $storageKey = _getStorageAccountKey -StorageAccountName $StorageAccountName
                     $storageUri = _getStorageUri -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
                     if (-not $BacpacName) {
                         $BacpacName = _getLatestBacPacFile -StorageAccountName $StorageAccountName -StorageContainerName $StorageContainerName
                     }
-                }
-                if (-not $Edition) {
-                    $Edition = "Standard"
-                }
-                if (-not $DatabaseMaxSizeBytes) {
-                    $DatabaseMaxSizeBytes = "5000000"
-                }
-                if (-not $ServiceObjectiveName) {
-                    $ServiceObjectiveName = "S0"
-                }
-                if (-not $ImportDatabaseAs) {
-                    $ImportDatabaseAs = $BacpacName.Replace(".bacpac", "")
-                }
-                $splat = @{
-                    DatabaseName = $ImportDatabaseAs
-                    ResourceGroupName = $ResourceGroupName
-                    ServerName = $ServerName
-                    StorageKeyType = "StorageAccessKey"
-                    StorageKey = $storageKey
-                    StorageUri = "$storageUri/$BacpacName"
-                    Edition = $Edition
-                    ServiceObjectiveName = $ServiceObjectiveName
-                    DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
-                    AdministratorLogin = $AdministratorLogin
-                    AdministratorLoginPassword = $AdministratorLoginPassword
-                    ErrorAction = "Stop"
-                }
-                try {
-                    $sqlImport = New-AzSqlDatabaseImport @splat
-                    return $sqlImport.OperationStatusLink
-                }
-                catch {
-                    if ($_.Exception.Message -match "Login failed") {
-                        $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
-                        $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
-                        Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                    if (-not $ImportDatabaseAs) {
+                        $ImportDatabaseAs = $BacpacName.Replace(".bacpac", "")
+                    }
+                    $splat = @{
+                        DatabaseName = $ImportDatabaseAs
+                        ResourceGroupName = $ResourceGroupName
+                        ServerName = $ServerName
+                        StorageKeyType = "StorageAccessKey"
+                        StorageKey = $storageKey
+                        StorageUri = "$storageUri/$BacpacName"
+                        Edition = $Edition
+                        ServiceObjectiveName = $ServiceObjectiveName
+                        DatabaseMaxSizeBytes = $DatabaseMaxSizeBytes
+                        AdministratorLogin = $AdministratorLogin
+                        AdministratorLoginPassword = $AdministratorLoginPassword
+                        ErrorAction = "Stop"
+                    }
+                    try {
+                        $sqlImport = New-AzSqlDatabaseImport @splat
+                        return $sqlImport.OperationStatusLink
+                    }
+                    catch {
+                        if ($_.Exception.Message -match "Login failed") {
+                            $Message = "Cannot validate argument on parameter 'AdministratorLogin' and 'AdministratorLoginPassword'. Pass the valid username and password and try again."
+                            $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                            Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                        }
+                        else {
+                            throw "An error occurred: $($_.Exception.Message)"
+                        }
                     }
                 }
+                else {
+                    $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not a valid storage container name. Pass the valid storage container name and try again."
+                    $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                    Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+                }
             }
+            #endregion start DB import
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
+            if ($_.Exception.Message -match "The variable cannot be validated") {
+                $Message = "Cannot validate argument on parameter 'StorageContainerName'. '$($StorageContainerName)' is not found in storage account '$($StorageAccountName)'. Pass the valid storage container name and try again."
+                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
+            elseif ($_.Exception.Message -match "Target database is not empty") {
+                $Message = "Database with name '$($ImportDatabaseAs)' already exists in '$($ServerName)'. Pass different name and try again."
+                $ErrorId = "InvalidArgument,PSDBSqlDatabase\Export-PSDBSqlDatabase"
+                Write-Error -Exception ArgumentException -Message $Message -Category InvalidArgument -ErrorId $ErrorId
+            }
+            else {
+                throw "An error occurred: $($_.Exception.Message)"
+            }
         }
     }
 }
@@ -609,7 +683,7 @@ function Invoke-PSDBDatabaseQuery {
             $command.ExecuteNonQuery() > $null
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
+            throw "An error occurred: $($_.Exception.Message)"
         }
         finally {
             # cleaning up
@@ -637,9 +711,17 @@ function New-PSDBConnectionString {
         [string] $DatabaseName,
         [Parameter(Mandatory = $true, ParameterSetName = "Standard")]
         [Parameter(Mandatory = $true, ParameterSetName = "MARSEnabled")]
-        [Parameter(Mandatory = $true, ParameterSetName = "AAD", HelpMessage = "Provide the username with domain name")]
+        [Parameter(Mandatory = $true, ParameterSetName = "AAD", HelpMessage = "Provide the username of database")]
         [ValidateNotNullOrEmpty()]
-        [pscredential] $Credential,
+        [string] $UserName,
+        [Parameter(Mandatory = $true, ParameterSetName = "AAD", HelpMessage = "Provide the domain name")]
+        [ValidateNotNullOrEmpty()]
+        [string] $Domain,
+        [Parameter(Mandatory = $true, ParameterSetName = "Standard")]
+        [Parameter(Mandatory = $true, ParameterSetName = "MARSEnabled")]
+        [Parameter(Mandatory = $true, ParameterSetName = "AAD", HelpMessage = "Provide the database secure password")]
+        [ValidateNotNullOrEmpty()]
+        [securestring] $Password,
         [Parameter(Mandatory = $true, ParameterSetName = "MARSEnabled")]
         [switch] $MultipleActiveResultSets,
         [Parameter(Mandatory = $true, ParameterSetName = "AADIntegrated")]
@@ -666,29 +748,19 @@ function New-PSDBConnectionString {
             [PSDBConnectionString] $ConnectionString = [PSDBConnectionString]::new()
             $CS = $null
             if ($PSCmdlet.ParameterSetName -eq "Standard") {
-                $UserId = $Credential.GetNetworkCredential().UserName
-                $Password = $Credential.GetNetworkCredential().Password
-                $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $UserId, $Password)
+                $pswd = _convertToPlainText -Password $Password
+                $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $UserName, $pswd)
             }
             elseif ($PSCmdlet.ParameterSetName -eq "MARSEnabled") {
-                $UserId = $Credential.GetNetworkCredential().UserName
-                $Password = $Credential.GetNetworkCredential().Password
-                $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $UserId, $Password, $MultipleActiveResultSets.IsPresent)
+                $pswd = _convertToPlainText -Password $Password
+                $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $UserName, $pswd, $MultipleActiveResultSets.IsPresent)
             }
             elseif ($PSCmdlet.ParameterSetName -eq "AADIntegrated") {
                 $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $Authentication)
             }
             elseif ($PSCmdlet.ParameterSetName -eq "AAD") {
-                if ([string]::IsNullOrWhiteSpace($Credential.GetNetworkCredential().Domain)) {
-                    $Message = "Provide the domain name with username in format 'domain\username' to form the connection string."
-                    $ErrorId = "ObjectNotSpecified,PSDBConnectionString\New-PSDBConnectionString"
-                    Write-Error -Exception ArgumentException -Message $Message -Category NotSpecified -ErrorId $ErrorId
-                } else {
-                    $UserId = $Credential.GetNetworkCredential().UserName
-                    $Domain = $Credential.GetNetworkCredential().Domain
-                    $Password = $Credential.GetNetworkCredential().Password
-                    $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $Authentication, $UserId, $Password, $Domain)
-                }
+                $pswd = _convertToPlainText -Password $Password
+                $CS = $ConnectionString.BuildConnectionString($SqlServerName, $DatabaseName, $Authentication, $UserName, $pswd, $Domain)
             }
             elseif ($PSCmdlet.ParameterSetName -eq "Encrypted") {
                 $CS = $ConnectionString.BuildConnectionString($DataSource, $InitialCatalog, $IntegratedSecurity, $ColumnEncryptionSetting)
@@ -696,7 +768,7 @@ function New-PSDBConnectionString {
             return $CS
         }
         catch {
-            throw "Error at line $($_.InvocationInfo.ScriptLineNumber) : $($_.Exception.Message)."
+            throw "An error occurred: $($_.Exception.Message)"
         }
     }
 }
@@ -716,75 +788,40 @@ function Set-PSDBDefault {
         [string] $ServerName,
         [ArgumentCompleter([DatabaseCompleter])]
         [ValidateNotNullOrEmpty()]
-        [string] $DatabaseName
+        [string] $DatabaseName,
+        [ValidateNotNullOrEmpty()]
+        [ValidateSet("Processs", "User", "Machine")]
+        [string] $Level = "Process"
     )
-    DynamicParam {
-        $dp = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
-        $ParameterName = 'Level'
-        # Create the collection of attributes
-        $AttributeCollection = New-Object System.Collections.ObjectModel.Collection[System.Attribute]
-        # Create and set the parameters' attributes
-        $ParameterAttribute = New-Object System.Management.Automation.ParameterAttribute
-        $ParameterAttribute.Mandatory = $false
-        $ParameterAttribute.HelpMessage = "Set the default parameters to work with the module on ease."
-        $arrSet = "Process", "User", "Machine"
-        $ValidateSetAttribute = New-Object System.Management.Automation.ValidateSetAttribute($arrSet)
-        # Add the ValidateSet to the attributes collection
-        $AttributeCollection.Add($ValidateSetAttribute)
-        # Add the attributes to the attributes collection
-        $AttributeCollection.Add($ParameterAttribute)
-        # Create and return the dynamic parameter
-        $RuntimeParameter = New-Object System.Management.Automation.RuntimeDefinedParameter($ParameterName, [string], $AttributeCollection)
-        $dp.Add($ParameterName, $RuntimeParameter)
-        return $dp
-    }
-    begin {
-        $Level = $PSBoundParameters[$ParameterName]
-    }
     process {
-        # setting the default subscription user gives and retrieving all the subscriptions in
-        # current context. This will be then used for tab completions.
-        # It is expected that user should have logged into Azure already.
-        if (-not $Level) {
-            $Level = "Process"
-        }
-        if ($PSCmdlet.ShouldProcess($Subscription, "Set-PSDBDefault")) {
+        try {
+            # setting the default subscription in current context.
+            # It is expected that user should have logged into Azure already.
             # clearing the defaults. It returns old values if session is not restarted.
             _clearDefaults
-            if ($null -eq $env:PSDB_SUBSCRIPTIONS) {
-                $Subscriptions = (Get-AzContext -ListAvailable -WarningAction SilentlyContinue).Subscription.Name -join ","
-            } else {
-                $Subscriptions = $env:PSDB_SUBSCRIPTIONS
+            Write-Verbose "Setting default subscription"
+            [System.Environment]::SetEnvironmentVariable("PSDB_SUBSCRIPTION", $Subscription, $Level)
+            [PSDBResources]::Subscription = $env:PSDB_SUBSCRIPTION
+            Set-AzContext -Subscription $Subscription > $null
+            # setting default parameters helps to pick the mandatory parameters from current running process.
+            if ($ResourceGroupName) {
+                [System.Environment]::SetEnvironmentVariable("PSDB_RESOURCEGROUPNAME", $ResourceGroupName, $Level)
+                $Global:PSDefaultParameterValues["*-PSDB*:ResourceGroupName"] = $ResourceGroupName
+                [PSDBResources]::ResourceGroupName = $env:PSDB_RESOURCEGROUPNAME
             }
-            if (-not $Subscriptions) {
-                throw [System.Exception]::new("Please login to Azure using 'Connect-AzAccount' cmdlet to continue..")
+            if ($ServerName) {
+                [System.Environment]::SetEnvironmentVariable("PSDB_SERVERNAME", $ServerName, $Level)
+                $Global:PSDefaultParameterValues["*-PSDB*:ServerName"] = $ServerName
+                [PSDBResources]::ServerName = $env:PSDB_SERVERNAME
             }
-            else {
-                [System.Environment]::SetEnvironmentVariable("PSDB_SUBSCRIPTION", $Subscription, $Level)
-                [System.Environment]::SetEnvironmentVariable("PSDB_SUBSCRIPTIONS", $Subscriptions, $Level)
-                [PSDBResources]::Subscription = $env:PSDB_SUBSCRIPTION
-                [PSDBResources]::Subscriptions = $env:PSDB_SUBSCRIPTIONS
-                if ((Get-AzContext).Subscription.Name -ne $Subscription) {
-                    Write-Verbose "Setting given subscription as default.."
-                    Set-AzContext -Subscription $Subscription > $null
-                }
+            if ($DatabaseName) {
+                [System.Environment]::SetEnvironmentVariable("PSDB_DATABASENAME", $DatabaseName, $Level)
+                $Global:PSDefaultParameterValues["*-PSDB*:DatabaseName"] = $DatabaseName
+                [PSDBResources]::DatabaseName = $env:PSDB_DATABASENAME
             }
         }
-        # setting default parameters helps to pick the mandatory parameters from current running process.
-        if ($ResourceGroupName) {
-            [System.Environment]::SetEnvironmentVariable("PSDB_RESOURCEGROUPNAME", $ResourceGroupName, $Level)
-            $Global:PSDefaultParameterValues["*-PSDB*:ResourceGroupName"] = $ResourceGroupName
-            [PSDBResources]::ResourceGroupName = $env:PSDB_RESOURCEGROUPNAME
-        }
-        if ($ServerName) {
-            [System.Environment]::SetEnvironmentVariable("PSDB_SERVERNAME", $ServerName, $Level)
-            $Global:PSDefaultParameterValues["*-PSDB*:ServerName"] = $ServerName
-            [PSDBResources]::ServerName = $env:PSDB_SERVERNAME
-        }
-        if ($DatabaseName) {
-            [System.Environment]::SetEnvironmentVariable("PSDB_DATABASENAME", $DatabaseName, $Level)
-            $Global:PSDefaultParameterValues["*-PSDB*:DatabaseName"] = $DatabaseName
-            [PSDBResources]::DatabaseName = $env:PSDB_DATABASENAME
+        catch {
+            throw "An error occurred: $($_.Exception.Message)"
         }
     }
 }
