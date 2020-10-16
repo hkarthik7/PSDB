@@ -1,7 +1,5 @@
 # PSDB
 
-[![Build Status](https://dev.azure.com/solteccode/PSDB/_apis/build/status/PSDB-CI-Github?branchName=master)](https://dev.azure.com/solteccode/PSDB/_build/latest?definitionId=30&branchName=master)
-
 **PSDB** module allows you to ease the automation of Azure Sql import and export. Also, it allows you to connect to the database and run queries.
 
 It comes with tab completion of resource groups, sql servers, storage accounts and key vaults to select the resources easily. Functions `Get-PSDBDatabaseData` and `Invoke-PSDBDatabaseQuery` allows you to open database connection and perfom database operations. 
